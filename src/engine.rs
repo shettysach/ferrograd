@@ -2,6 +2,8 @@ use std::cell::RefCell;
 use std::fmt;
 use std::ops;
 use std::rc::Rc;
+use uuid::Uuid;
+mod backprop;
 mod composite;
 mod primitive;
 
@@ -17,6 +19,7 @@ pub struct V {
     pub backward: Option<fn(value: &V)>, // Function pointer
     pub prev: Vec<Value>,
     pub op: Option<Operation>,
+    pub uuid: Uuid,
 }
 
 impl Value {
@@ -33,6 +36,7 @@ impl Value {
             backward,
             prev,
             op,
+            uuid: Uuid::new_v4(),
         })))
     }
 
@@ -53,7 +57,7 @@ impl ops::Deref for Value {
 impl fmt::Debug for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let v = &self.borrow();
-        write!(f, "data = {} grad = {}", v.data, v.grad)
+        write!(f, "data = {} | grad = {}", v.data, v.grad)
     }
 }
 
@@ -61,8 +65,22 @@ pub enum Operation {
     Add,
     Mul,
     Pow,
-    ReLu,
+    ReLU,
     Neg,
     Sub,
     Div,
+}
+
+impl Operation {
+    fn symbol(&self) -> char {
+        match self {
+            Self::Add => '+',
+            Self::Mul => '*',
+            Self::Pow => '^',
+            Self::ReLU => 'r',
+            Self::Neg => '~',
+            Self::Sub => '-',
+            Self::Div => '/',
+        }
+    }
 }
