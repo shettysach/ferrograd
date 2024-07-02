@@ -68,7 +68,7 @@ fn mul(self: Value, rhs: f64) -> Value {
 #[opimps::impl_ops_lprim(ops::Mul)]
 fn mul(self: f64, rhs: Value) -> Value {
     Value::init(
-        self + rhs.borrow().data,
+        self * rhs.borrow().data,
         0.0,
         Some(mul_backward),
         vec![Value::new(self), rhs.clone()],
@@ -77,8 +77,10 @@ fn mul(self: f64, rhs: Value) -> Value {
 }
 
 fn mul_backward(value: &V) {
-    value.prev[0].borrow_mut().grad += value.prev[1].borrow().data * value.grad;
-    value.prev[1].borrow_mut().grad += value.prev[0].borrow().data * value.grad;
+    let data0 = value.prev[0].borrow().data;
+    let data1 = value.prev[1].borrow().data;
+    value.prev[0].borrow_mut().grad += data1 * value.grad;
+    value.prev[1].borrow_mut().grad += data0 * value.grad;
 }
 
 // POWER and ReLu

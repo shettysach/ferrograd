@@ -57,9 +57,9 @@ impl fmt::Display for Value {
         let v = &self.borrow();
 
         if let Some(op) = &v.op {
-            write!(f, "{} • {} • {}", op, v.data, v.grad,)
+            write!(f, "{} d = {} • g = {}", op, v.data, v.grad,)
         } else {
-            write!(f, "{} • {}", v.data, v.grad,)
+            write!(f, "d = {} • g = {}", v.data, v.grad,)
         }
     }
 }

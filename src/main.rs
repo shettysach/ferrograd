@@ -2,15 +2,14 @@ mod engine;
 use engine::Value;
 
 fn main() {
-    let a = Value::new(1.0);
-    let b = Value::new(2.0);
-    let c = Value::new(3.0);
-    let d = Value::new(4.0);
+    let a = Value::new(5.0);
+    let a2 = Value::new(5.0);
+    let b = &a.pow(2.);
+    let c = &a2 * &a2;
 
-    let e = &a * &b;
-    let f = &c + &d;
-    let g = &e * &f;
+    b.backward();
+    println!("{}", b.tree());
 
-    g.backward();
-    println!("{}", g.tree());
+    c.backward();
+    println!("{}", c.tree());
 }
