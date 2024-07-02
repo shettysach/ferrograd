@@ -8,15 +8,9 @@ fn main() {
     let d = Value::new(4.0);
 
     let e = &a * &b;
-    let d = &c * &d;
-    let f = &e * &d;
+    let f = &c + &d;
+    let g = &e * &f;
 
-    f.backward();
-    println!("{:?}", a);
-    println!("{:?}", b);
-    println!("{:?}", c);
-    println!("{:?}", d);
-
-    println!("{:?}", e);
-    println!("{:?}", f);
+    g.backward();
+    println!("{}", g.tree());
 }

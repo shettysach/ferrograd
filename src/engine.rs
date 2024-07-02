@@ -1,8 +1,6 @@
-use std::cell::RefCell;
-use std::fmt;
-use std::ops;
-use std::rc::Rc;
+use std::{cell::RefCell, fmt, ops, rc::Rc};
 use uuid::Uuid;
+
 mod backprop;
 mod composite;
 mod primitive;
@@ -54,10 +52,15 @@ impl ops::Deref for Value {
     }
 }
 
-impl fmt::Debug for Value {
+impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let v = &self.borrow();
-        write!(f, "data = {} | grad = {}", v.data, v.grad)
+
+        if let Some(op) = &v.op {
+            write!(f, "{} • {} • {}", op, v.data, v.grad,)
+        } else {
+            write!(f, "{} • {}", v.data, v.grad,)
+        }
     }
 }
 
@@ -66,9 +69,6 @@ pub enum Operation {
     Mul,
     Pow,
     ReLU,
-    Neg,
-    Sub,
-    Div,
 }
 
 impl Operation {
@@ -78,9 +78,12 @@ impl Operation {
             Self::Mul => '*',
             Self::Pow => '^',
             Self::ReLU => 'r',
-            Self::Neg => '~',
-            Self::Sub => '-',
-            Self::Div => '/',
         }
+    }
+}
+
+impl fmt::Display for Operation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", &self.symbol())
     }
 }

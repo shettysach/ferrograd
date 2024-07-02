@@ -1,6 +1,7 @@
 use super::Value;
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
+use termtree::Tree;
 
 impl Value {
     pub fn backward(&self) {
@@ -14,11 +15,11 @@ impl Value {
         self.borrow_mut().grad = 1.0;
 
         // Backpropagate
-        for v in topo {
+        topo.iter().for_each(|v| {
             if let Some(backprop) = v.borrow().backward {
                 backprop(&v.borrow());
             }
-        }
+        });
     }
 
     fn topological_sort(&self, topo: &mut Vec<Value>, visited: &mut HashSet<Value>) {
@@ -29,6 +30,15 @@ impl Value {
 
             topo.push(self.clone());
         }
+    }
+
+    pub fn tree(&self) -> Tree<Self> {
+        let mut root = Tree::new(self.clone());
+        if self.borrow().op.is_some() {
+            root.push(self.borrow().prev[0].tree());
+            root.push(self.borrow().prev[1].tree());
+        }
+        root
     }
 }
 
