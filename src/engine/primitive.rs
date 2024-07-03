@@ -1,5 +1,5 @@
-use super::{Operation, Value, V};
-use std::ops;
+use super::{Activation, Operation, Value, V};
+use std::{f64::consts::E, ops};
 
 // ADDITION
 
@@ -7,10 +7,10 @@ use std::ops;
 fn add(self: Value, rhs: Value) -> Value {
     Value::init(
         self.borrow().data + rhs.borrow().data,
-        0.0,
         Some(add_backward),
         vec![self.clone(), rhs.clone()],
         Some(Operation::Add),
+        Some(String::new()),
     )
 }
 
@@ -18,10 +18,10 @@ fn add(self: Value, rhs: Value) -> Value {
 fn add(self: Value, rhs: f64) -> Value {
     Value::init(
         self.borrow().data + rhs,
-        0.0,
         Some(add_backward),
-        vec![self.clone(), Value::new(rhs)],
+        vec![self.clone(), Value::from(rhs)],
         Some(Operation::Add),
+        Some(String::new()),
     )
 }
 
@@ -29,10 +29,10 @@ fn add(self: Value, rhs: f64) -> Value {
 fn add(self: f64, rhs: Value) -> Value {
     Value::init(
         self + rhs.borrow().data,
-        0.0,
         Some(add_backward),
-        vec![Value::new(self), rhs.clone()],
+        vec![Value::from(self), rhs.clone()],
         Some(Operation::Add),
+        Some(String::new()),
     )
 }
 
@@ -47,10 +47,10 @@ fn add_backward(value: &V) {
 fn mul(self: Value, rhs: Value) -> Value {
     Value::init(
         self.borrow().data * rhs.borrow().data,
-        0.0,
         Some(mul_backward),
         vec![self.clone(), rhs.clone()],
         Some(Operation::Mul),
+        Some(String::new()),
     )
 }
 
@@ -58,10 +58,10 @@ fn mul(self: Value, rhs: Value) -> Value {
 fn mul(self: Value, rhs: f64) -> Value {
     Value::init(
         self.borrow().data * rhs,
-        0.0,
         Some(mul_backward),
-        vec![self.clone(), Value::new(rhs)],
+        vec![self.clone(), Value::from(rhs)],
         Some(Operation::Mul),
+        Some(String::new()),
     )
 }
 
@@ -69,10 +69,10 @@ fn mul(self: Value, rhs: f64) -> Value {
 fn mul(self: f64, rhs: Value) -> Value {
     Value::init(
         self * rhs.borrow().data,
-        0.0,
         Some(mul_backward),
-        vec![Value::new(self), rhs.clone()],
+        vec![Value::from(self), rhs.clone()],
         Some(Operation::Mul),
+        Some(String::new()),
     )
 }
 
@@ -89,26 +89,57 @@ impl Value {
     pub fn pow(&self, power: f64) -> Value {
         Value::init(
             self.borrow().data.powf(power),
-            0.0,
             Some(|value: &V| {
                 let base = value.prev[0].borrow().data;
                 let power = value.prev[1].borrow().data;
                 value.prev[0].borrow_mut().grad += power * base.powf(power - 1.0) * value.grad;
             }),
-            vec![self.clone(), Self::new(power)],
+            vec![self.clone(), Value::from(power)],
             Some(Operation::Pow),
+            Some(String::new()),
         )
     }
 
     pub fn relu(&self) -> Value {
         Value::init(
             self.borrow().data.max(0.0),
-            0.0,
             Some(|value: &V| {
                 value.prev[0].borrow_mut().grad += if value.data > 0.0 { value.grad } else { 0.0 };
             }),
             vec![self.clone()],
-            Some(Operation::ReLU),
+            Some(Operation::AF(Activation::ReLU)),
+            Some(String::new()),
         )
+    }
+
+    pub fn tanh(&self) -> Value {
+        let e2x = E.powf(2. * self.borrow().data);
+        Value::init(
+            (e2x - 1.) / (e2x + 1.),
+            Some(|value: &V| {
+                value.prev[0].borrow_mut().grad += (1. - (value.data.powi(2))) * value.grad;
+            }),
+            vec![self.clone()],
+            Some(Operation::AF(Activation::Tanh)),
+            Some(String::new()),
+        )
+    }
+
+    pub fn sigmoid(&self) -> Value {
+        let enx = E.powf(-1. * self.borrow().data);
+        Value::init(
+            1. / (1. + enx),
+            Some(|value: &V| {
+                value.prev[0].borrow_mut().grad += value.data * (1. - value.data) * value.grad;
+            }),
+            vec![self.clone()],
+            Some(Operation::AF(Activation::Sigmoid)),
+            Some(String::new()),
+        )
+    }
+
+    // Only for constants
+    fn from(data: f64) -> Value {
+        Value::init(data, None, Vec::new(), None, None)
     }
 }

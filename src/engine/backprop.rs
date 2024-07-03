@@ -32,11 +32,12 @@ impl Value {
         }
     }
 
-    pub fn tree(&self) -> Tree<Self> {
+    pub fn tree(&self) -> Tree<Value> {
         let mut root = Tree::new(self.clone());
         if self.borrow().op.is_some() {
-            root.push(self.borrow().prev[0].tree());
-            root.push(self.borrow().prev[1].tree());
+            self.borrow().prev.iter().for_each(|p| {
+                root.push(p.tree());
+            })
         }
         root
     }
@@ -49,7 +50,7 @@ impl Hash for Value {
 }
 
 impl PartialEq for Value {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Value) -> bool {
         self.borrow().uuid == other.borrow().uuid
     }
 }
