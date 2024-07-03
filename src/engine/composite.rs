@@ -1,5 +1,5 @@
 use super::Value;
-use std::ops;
+use std::{iter::Sum, ops};
 
 // NEGATION
 
@@ -70,4 +70,19 @@ fn div_assign(self: Value, rhs: Value) {
     let name = self.borrow().var_name.clone();
     *self = &*self / rhs;
     self.borrow_mut().var_name = name;
+}
+
+impl Sum for Value {
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = Self>,
+    {
+        let mut iter = iter;
+        let first = match iter.next() {
+            Some(first) => first,
+            None => return Value::new(0.),
+        };
+
+        iter.fold(first, |acc, val| acc + val)
+    }
 }

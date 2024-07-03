@@ -122,6 +122,7 @@ impl fmt::Display for Operation {
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum Activation {
     ReLU,
     Tanh,
