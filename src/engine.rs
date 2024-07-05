@@ -1,7 +1,8 @@
 use std::{cell::RefCell, fmt, ops, rc::Rc};
 use uuid::Uuid;
 
-mod backprop;
+mod activation;
+mod backpropagation;
 mod composite;
 mod primitive;
 
@@ -15,7 +16,7 @@ pub struct V {
     pub prev: Vec<Value>,
     pub op: Option<Operation>,
     pub uuid: Uuid,
-    pub var_name: Option<String>, // If constant, None
+    pub var_name: Option<String>,
 }
 
 impl Value {
@@ -64,8 +65,8 @@ impl fmt::Display for Value {
             if var_name.is_empty() {
                 "".to_string()
             } else {
-                format!("← \x1B[1m{} \x1B[0m", var_name)
-                //format!("← {}", var_name)
+                format!("← {}", var_name)
+                //format!("← \x1B[1m{} \x1B[0m", var_name)
             }
         };
 
@@ -110,6 +111,7 @@ impl Operation {
             Operation::Mul => '*',
             Operation::Pow => '^',
             Operation::AF(Activation::ReLU) => 'R',
+            Operation::AF(Activation::LeakyReLU) => 'L',
             Operation::AF(Activation::Tanh) => 't',
             Operation::AF(Activation::Sigmoid) => 'σ',
         }
@@ -125,6 +127,7 @@ impl fmt::Display for Operation {
 #[derive(Clone, Copy)]
 pub enum Activation {
     ReLU,
+    LeakyReLU,
     Tanh,
     Sigmoid,
 }

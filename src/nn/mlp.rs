@@ -13,6 +13,7 @@ impl MultiLayerPerceptron {
     ) -> MultiLayerPerceptron {
         nouts.insert(0, nin);
         let n = nouts.len() - 1;
+
         let layers = (0..n)
             .map(|i| {
                 let nin = nouts[i];

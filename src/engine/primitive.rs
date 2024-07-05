@@ -1,5 +1,5 @@
-use super::{Activation, Operation, Value, V};
-use std::{f64::consts::E, ops};
+use super::{Operation, Value, V};
+use std::ops;
 
 // ADDITION
 
@@ -97,47 +97,6 @@ impl Value {
             }),
             vec![self.clone(), Value::new_const(power)],
             Some(Operation::Pow),
-            Some(String::new()),
-        )
-    }
-
-    pub fn relu(&self) -> Value {
-        Value::init(
-            self.borrow().data.max(0.0),
-            Some(|value: &V| {
-                value.prev[0].borrow_mut().grad +=
-                    if value.data > 0.0 { value.grad } else { 0.0 };
-            }),
-            vec![self.clone()],
-            Some(Operation::AF(Activation::ReLU)),
-            Some(String::new()),
-        )
-    }
-
-    pub fn tanh(&self) -> Value {
-        let e2x = E.powf(2. * self.borrow().data);
-        Value::init(
-            (e2x - 1.) / (e2x + 1.),
-            Some(|value: &V| {
-                value.prev[0].borrow_mut().grad +=
-                    (1. - (value.data.powi(2))) * value.grad;
-            }),
-            vec![self.clone()],
-            Some(Operation::AF(Activation::Tanh)),
-            Some(String::new()),
-        )
-    }
-
-    pub fn sigmoid(&self) -> Value {
-        let enx = E.powf(-1. * self.borrow().data);
-        Value::init(
-            1. / (1. + enx),
-            Some(|value: &V| {
-                value.prev[0].borrow_mut().grad +=
-                    value.data * (1. - value.data) * value.grad;
-            }),
-            vec![self.clone()],
-            Some(Operation::AF(Activation::Sigmoid)),
             Some(String::new()),
         )
     }

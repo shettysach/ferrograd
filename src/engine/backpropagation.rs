@@ -11,10 +11,8 @@ impl Value {
         self.topological_sort(&mut topo, &mut visited);
         topo.reverse();
 
-        // dz/dz = 1
         self.borrow_mut().grad = 1.0;
 
-        // Backpropagate
         topo.iter().for_each(|v| {
             if let Some(backprop) = v.borrow().backward {
                 backprop(&v.borrow());
@@ -22,7 +20,11 @@ impl Value {
         });
     }
 
-    fn topological_sort(&self, topo: &mut Vec<Value>, visited: &mut HashSet<Value>) {
+    fn topological_sort(
+        &self,
+        topo: &mut Vec<Value>,
+        visited: &mut HashSet<Value>,
+    ) {
         if visited.insert(self.clone()) {
             self.borrow().prev.iter().for_each(|child| {
                 child.topological_sort(topo, visited);

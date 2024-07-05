@@ -25,6 +25,7 @@ impl Neuron {
 
         match self.nonlin {
             Some(Activation::ReLU) => act.relu(),
+            Some(Activation::LeakyReLU) => act.leaky_relu(),
             Some(Activation::Tanh) => act.tanh(),
             Some(Activation::Sigmoid) => act.sigmoid(),
             None => act,
@@ -37,7 +38,7 @@ impl Neuron {
         p
     }
 
-    pub fn with_names(self) -> Neuron {
+    pub fn name_params(self) -> Neuron {
         let w = self
             .w
             .iter()
@@ -47,5 +48,12 @@ impl Neuron {
         let b = self.b.clone().with_name("bias");
         let nonlin = self.nonlin;
         Neuron { w, b, nonlin }
+    }
+
+    pub fn name_inputs(&self, x: Vec<Value>) -> Vec<Value> {
+        x.iter()
+            .enumerate()
+            .map(|(i, xi)| xi.clone().with_name(&format!("input {i}")))
+            .collect()
     }
 }
