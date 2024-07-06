@@ -80,7 +80,7 @@ impl Sum for Value {
         let mut iter = iter;
         let first = match iter.next() {
             Some(first) => first,
-            None => return Value::new(0.),
+            None => return Value::new(0.0),
         };
 
         iter.fold(first, |acc, val| acc + val)

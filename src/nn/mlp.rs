@@ -34,10 +34,4 @@ impl MultiLayerPerceptron {
     pub fn parameters(&self) -> Vec<Value> {
         self.layers.iter().flat_map(|l| l.parameters()).collect()
     }
-
-    pub fn zero_grad(&self) {
-        for p in self.parameters() {
-            p.borrow_mut().grad = 0.0;
-        }
-    }
 }

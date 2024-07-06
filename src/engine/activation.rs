@@ -34,13 +34,13 @@ impl Value {
     }
 
     pub fn tanh(&self) -> Value {
-        let e2x = E.powf(2. * self.borrow().data);
+        let e2x = E.powf(2.0 * self.borrow().data);
 
         Value::init(
-            (e2x - 1.) / (e2x + 1.),
+            (e2x - 1.0) / (e2x + 1.0),
             Some(|value: &V| {
                 value.prev[0].borrow_mut().grad +=
-                    (1. - (value.data.powi(2))) * value.grad;
+                    (1.0 - (value.data.powi(2))) * value.grad;
             }),
             vec![self.clone()],
             Some(Operation::AF(Activation::Tanh)),
@@ -49,13 +49,13 @@ impl Value {
     }
 
     pub fn sigmoid(&self) -> Value {
-        let enx = E.powf(-1. * self.borrow().data);
+        let enx = E.powf(-1.0 * self.borrow().data);
 
         Value::init(
-            1. / (1. + enx),
+            1.0 / (1.0 + enx),
             Some(|value: &V| {
                 value.prev[0].borrow_mut().grad +=
-                    value.data * (1. - value.data) * value.grad;
+                    value.data * (1.0 - value.data) * value.grad;
             }),
             vec![self.clone()],
             Some(Operation::AF(Activation::Sigmoid)),

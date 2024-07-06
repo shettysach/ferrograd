@@ -2,9 +2,9 @@ use crate::engine::{Activation, Value};
 use rand::{distributions::Uniform, Rng};
 
 pub struct Neuron {
-    w: Vec<Value>,
-    b: Value,
-    nonlin: Option<Activation>,
+    pub w: Vec<Value>,
+    pub b: Value,
+    pub nonlin: Option<Activation>,
 }
 
 impl Neuron {
@@ -36,24 +36,5 @@ impl Neuron {
         let mut p = self.w.clone();
         p.insert(0, self.b.clone());
         p
-    }
-
-    pub fn name_params(self) -> Neuron {
-        let w = self
-            .w
-            .iter()
-            .enumerate()
-            .map(|(i, wi)| wi.clone().with_name(&format!("weight {i}")))
-            .collect();
-        let b = self.b.clone().with_name("bias");
-        let nonlin = self.nonlin;
-        Neuron { w, b, nonlin }
-    }
-
-    pub fn name_inputs(&self, x: Vec<Value>) -> Vec<Value> {
-        x.iter()
-            .enumerate()
-            .map(|(i, xi)| xi.clone().with_name(&format!("input {i}")))
-            .collect()
     }
 }
