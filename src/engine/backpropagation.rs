@@ -1,7 +1,6 @@
 use super::Value;
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
-use termtree::Tree;
 
 impl Value {
     pub fn backward(&self) {
@@ -32,16 +31,6 @@ impl Value {
 
             topo.push(self.clone());
         }
-    }
-
-    pub fn tree(&self) -> Tree<Value> {
-        let mut root = Tree::new(self.clone());
-        if self.borrow().op.is_some() {
-            self.borrow().prev.iter().for_each(|p| {
-                root.push(p.tree());
-            })
-        }
-        root
     }
 }
 

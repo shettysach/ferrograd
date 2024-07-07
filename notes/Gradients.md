@@ -57,8 +57,10 @@ def _backward():
 
 ```rust
 fn mul_backward(value: &V) {
-    value.prev[0].borrow_mut().grad += value.prev[1].borrow().data * value.grad;
-    value.prev[1].borrow_mut().grad += value.prev[0].borrow().data * value.grad;
+    let data0 = value.prev[0].borrow().data;
+    let data1 = value.prev[1].borrow().data;
+    value.prev[0].borrow_mut().grad += data1 * value.grad;
+    value.prev[1].borrow_mut().grad += data0 * value.grad;
 }
 ```
 ----
@@ -94,7 +96,6 @@ $$\begin{aligned}
 z = \max(0,x)
 \\\\
 \frac{\partial{z}}{\partial{x}} = 
-    \Bigg\{
     \begin{array}{ll}
     1, & \text{if } x > 0,\\
     0, & \text{otherwise.}
@@ -122,7 +123,6 @@ $$\begin{aligned}
 z = \max(0.01x,x)
 \\\\
 \frac{\partial{z}}{\partial{x}} = 
-    \Bigg\{
     \begin{array}{ll}
     1, & \text{if } x > 0,\\
     0.01, & \text{otherwise.}

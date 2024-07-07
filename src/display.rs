@@ -3,6 +3,24 @@ use crate::{
     nn::Neuron,
 };
 use std::fmt;
+use termtree::Tree;
+
+impl Value {
+    pub fn with_name(self, var_name: &str) -> Value {
+        self.borrow_mut().var_name = Some(var_name.to_string());
+        self
+    }
+
+    pub fn tree(&self) -> Tree<Value> {
+        let mut root = Tree::new(self.clone());
+        if self.borrow().op.is_some() {
+            self.borrow().prev.iter().for_each(|p| {
+                root.push(p.tree());
+            })
+        }
+        root
+    }
+}
 
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -40,13 +58,6 @@ impl fmt::Display for Value {
                 write!(f, "{:.3}", v.data)
             }
         }
-    }
-}
-
-impl Value {
-    pub fn with_name(self, var_name: &str) -> Value {
-        self.borrow_mut().var_name = Some(var_name.to_string());
-        self
     }
 }
 
@@ -88,5 +99,16 @@ impl Neuron {
             .enumerate()
             .map(|(i, xi)| xi.clone().with_name(&format!("input {i}")))
             .collect()
+    }
+}
+
+impl fmt::Display for Neuron {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let actv_fn = match self.nonlin {
+            Some(val) => Operation::AF(val).symbol(),
+            None => ' ',
+        };
+
+        write!(f, "{}({})", actv_fn, self.w.len())
     }
 }

@@ -6,8 +6,10 @@ use micrograd::{
 fn main() {
     let n = Neuron::new(2, Some(Activation::ReLU)).name_params();
 
-    let x = vec![Value::new(-20.66), Value::new(100.625)];
+    let x = vec![Value::new(-2.0), Value::new(1.0)];
     let x = n.name_inputs(x);
+
+    println!("{}\n", n);
 
     let y = n.forward(&x);
     println!("Forward pass:\n{}", y.tree());
