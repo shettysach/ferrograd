@@ -1,5 +1,8 @@
 #### micrograd
 
+- A small autograd engine, inspired from [karpathy/micrograd](https://github.com/karpathy/micrograd) and  [Mathemmagician/rustygrad](https://github.com/Mathemmagician/rustygrad-tutorial), with a few more features, such as additional activation functions and optimizers.
+- See `/notes/Gradients.md` for explanation of gradients and backward functions.
+
 ```rust
 use micrograd::engine::Value;
 
@@ -25,11 +28,16 @@ fn main() {
 
     g.backward();
     println!("{}", g.tree());
+
+    println!("g.data = {:.4}", g.borrow().data);
+    println!("a.grad = {:.4}", a.borrow().grad);
+    println!("b.grad = {:.4}", b.borrow().grad);
 }
 ```
 
 ##### Examples
-----
+
+---
 
 ```console
 cargo run --example neuron
@@ -60,7 +68,9 @@ R data = 0.326, grad = 1.000
     │       └── data = 1.000, grad = -0.096 ← input 1
     └── data = 0.000, grad = 1.000 ← bias
 ```
-----
+
+---
+
 ```console
 cargo run --example moons_adam
 ```
@@ -98,8 +108,7 @@ cargo run --example moons_adam
 · · · ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■
 ```
 
-WIP
-
 ###### Credits
+
 - [karpathy/micrograd](https://github.com/karpathy/micrograd)
-- [Mathemmagician/rustygrad](https://github.com/Mathemmagician/rustygrad)
+- [Mathemmagician/rustygrad](https://github.com/Mathemmagician/rustygrad-tutorial)

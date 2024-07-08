@@ -24,7 +24,7 @@ impl SGD {
             self.params.iter_mut().zip(self.velocities.iter_mut())
         {
             *velocity =
-                self.momentum * *velocity - self.lr * param.borrow().grad;
+                self.momentum * (*velocity - self.lr * param.borrow().grad);
             param.borrow_mut().data += *velocity;
         }
     }

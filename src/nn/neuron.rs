@@ -1,5 +1,6 @@
-use crate::engine::{Activation, Value};
+use crate::engine::{Activation, Operation, Value};
 use rand::{distributions::Uniform, Rng};
+use std::fmt;
 
 pub struct Neuron {
     pub w: Vec<Value>,
@@ -36,5 +37,37 @@ impl Neuron {
         let mut p = self.w.clone();
         p.insert(0, self.b.clone());
         p
+    }
+}
+
+impl Neuron {
+    pub fn name_params(self) -> Neuron {
+        let w = self
+            .w
+            .iter()
+            .enumerate()
+            .map(|(i, wi)| wi.clone().with_name(&format!("weight {i}")))
+            .collect();
+        let b = self.b.clone().with_name("bias");
+        let nonlin = self.nonlin;
+        Neuron { w, b, nonlin }
+    }
+
+    pub fn name_inputs(&self, x: Vec<Value>) -> Vec<Value> {
+        x.iter()
+            .enumerate()
+            .map(|(i, xi)| xi.clone().with_name(&format!("input {i}")))
+            .collect()
+    }
+}
+
+impl fmt::Display for Neuron {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let actv_fn = match self.nonlin {
+            Some(val) => Operation::AF(val).symbol(),
+            None => ' ',
+        };
+
+        write!(f, "{}({})", actv_fn, self.w.len())
     }
 }

@@ -22,4 +22,8 @@ fn main() {
 
     g.backward();
     println!("{}", g.tree());
+
+    println!("g.data = {:.4}", g.borrow().data);
+    println!("a.grad = {:.4}", a.borrow().grad);
+    println!("b.grad = {:.4}", b.borrow().grad);
 }

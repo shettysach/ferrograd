@@ -46,14 +46,13 @@ impl Adam {
         {
             let grad = param.borrow().grad;
 
-            *m = self.beta1 * *m + (1.0 - self.beta1) * grad;
-            *v = self.beta2 * *v + (1.0 - self.beta2) * grad * grad;
+            *m = self.beta1 * (*m + (1.0 - self.beta1) * grad);
+            *v = self.beta2 * (*v + (1.0 - self.beta2) * grad * grad);
 
-            let m_hat = *m / (1.0 - self.beta1.powi(self.t as i32));
-            let v_hat = *v / (1.0 - self.beta2.powi(self.t as i32));
+            let m_t = *m / (1.0 - self.beta1.powi(self.t as i32));
+            let v_t = *v / (1.0 - self.beta2.powi(self.t as i32));
 
-            param.borrow_mut().data -=
-                lr_t * m_hat / (v_hat.sqrt() + self.epsilon);
+            param.borrow_mut().data -= lr_t * m_t / (v_t.sqrt() + self.epsilon);
         }
     }
 
