@@ -1,6 +1,8 @@
 use crate::engine::{Activation, Value};
 use crate::nn::Neuron;
 
+// Layer of neurons
+
 pub struct Layer {
     neurons: Vec<Neuron>,
 }
@@ -12,10 +14,12 @@ impl Layer {
         }
     }
 
+    // Forward input through all neurons of the layer
     pub fn forward(&self, x: &Vec<Value>) -> Vec<Value> {
         self.neurons.iter().map(|n| n.forward(x)).collect()
     }
 
+    // Weights and biases of the neurons in the layer
     pub fn parameters(&self) -> Vec<Value> {
         self.neurons.iter().flat_map(|n| n.parameters()).collect()
     }

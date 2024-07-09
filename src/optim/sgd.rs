@@ -1,5 +1,8 @@
 use crate::engine::Value;
 
+// See /notes/Optimizers.md
+// https://towardsdatascience.com/stochastic-gradient-descent-with-momentum-a84097641a5d
+
 pub struct SGD {
     params: Vec<Value>,
     lr: f64,
@@ -20,13 +23,13 @@ impl SGD {
     }
 
     pub fn step(&mut self) {
-        for (param, velocity) in
-            self.params.iter_mut().zip(self.velocities.iter_mut())
-        {
-            *velocity =
-                self.momentum * (*velocity - self.lr * param.borrow().grad);
-            param.borrow_mut().data += *velocity;
-        }
+        self.params.iter().zip(self.velocities.iter_mut()).for_each(
+            |(param, velocity)| {
+                *velocity =
+                    self.momentum * *velocity + self.lr * param.borrow().grad;
+                param.borrow_mut().data -= *velocity;
+            },
+        )
     }
 
     pub fn zero_grad(&self) {

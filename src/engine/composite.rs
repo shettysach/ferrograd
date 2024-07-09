@@ -1,14 +1,16 @@
 use super::Value;
 use std::{iter::Sum, ops};
 
-// NEGATION
+// See /notes/Gradients.md
+
+// Negation
 
 #[opimps::impl_uni_ops(ops::Neg)]
 fn neg(self: Value) -> Value {
     self * -1.0
 }
 
-// SUBTRACTION
+// Subtraction
 
 #[opimps::impl_ops(ops::Sub)]
 fn sub(self: Value, rhs: Value) -> Value {
@@ -25,7 +27,7 @@ fn sub(self: f64, rhs: Value) -> Value {
     self + (-rhs)
 }
 
-// DIVISION
+// Division
 
 #[opimps::impl_ops(ops::Div)]
 fn div(self: Value, rhs: Value) -> Value {
@@ -42,35 +44,37 @@ fn div(self: f64, rhs: Value) -> Value {
     self * rhs.pow(-1.0)
 }
 
-// ASSIGNS
+// Assigns
 
 #[opimps::impl_ops_assign(ops::AddAssign)]
 fn add_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name.clone();
+    let name = self.borrow()._var_name.clone();
     *self = &*self + rhs;
-    self.borrow_mut().var_name = name;
+    self.borrow_mut()._var_name = name;
 }
 
 #[opimps::impl_ops_assign(ops::MulAssign)]
 fn mul_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name.clone();
+    let name = self.borrow()._var_name.clone();
     *self = &*self * rhs;
-    self.borrow_mut().var_name = name;
+    self.borrow_mut()._var_name = name;
 }
 
 #[opimps::impl_ops_assign(ops::SubAssign)]
 fn sub_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name.clone();
+    let name = self.borrow()._var_name.clone();
     *self = &*self - rhs;
-    self.borrow_mut().var_name = name;
+    self.borrow_mut()._var_name = name;
 }
 
 #[opimps::impl_ops_assign(ops::DivAssign)]
 fn div_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name.clone();
+    let name = self.borrow()._var_name.clone();
     *self = &*self / rhs;
-    self.borrow_mut().var_name = name;
+    self.borrow_mut()._var_name = name;
 }
+
+// Sum trait
 
 impl Sum for Value {
     fn sum<I>(iter: I) -> Self

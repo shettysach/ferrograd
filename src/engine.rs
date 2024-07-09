@@ -1,5 +1,4 @@
 use std::{cell::RefCell, fmt, ops, rc::Rc};
-
 use uuid::Uuid;
 
 mod activation;
@@ -11,17 +10,18 @@ mod primitive;
 #[derive(Clone)]
 pub struct Value(Rc<RefCell<V>>);
 
-//
+// Holds data
 pub struct V {
     pub data: f64,
     pub grad: f64,
-    pub backward: Option<fn(value: &V)>,
-    pub prev: Vec<Value>,
-    pub op: Option<Operation>,
-    pub uuid: Uuid,
-    pub var_name: Option<String>, // None if constant
+    pub _backward: Option<fn(value: &V)>, // Function pointer to the backward function
+    pub _prev: Vec<Value>,                // Children (Operands)
+    pub _op: Option<Operation>,           // None if initialisation or constant
+    pub _uuid: Uuid,                      // Unique id for easier hashing and eq
+    pub _var_name: Option<String>,        // None if constant
 }
 
+// val.0.borrow() becomes val.borrow()
 impl ops::Deref for Value {
     type Target = Rc<RefCell<V>>;
 
@@ -30,6 +30,7 @@ impl ops::Deref for Value {
     }
 }
 
+// Main
 impl Value {
     pub fn init(
         data: f64,
@@ -41,26 +42,30 @@ impl Value {
         Value(Rc::new(RefCell::new(V {
             data,
             grad: 0.0,
-            backward,
-            prev,
-            op,
-            uuid: Uuid::new_v4(),
-            var_name,
+            _backward: backward,
+            _prev: prev,
+            _op: op,
+            _uuid: Uuid::new_v4(),
+            _var_name: var_name,
         })))
     }
 
+    // For initialising variables
     pub fn new(data: f64) -> Value {
         Value::init(data, None, Vec::new(), None, Some(String::new()))
     }
 }
 
+// Extra
 impl Value {
+    // changes var_name
     pub fn with_name(self, var_name: &str) -> Value {
-        self.borrow_mut().var_name = Some(var_name.to_string());
+        self.borrow_mut()._var_name = Some(var_name.to_string());
         self
     }
 }
 
+// Display trait for printing
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let v = &self.borrow();
@@ -73,7 +78,7 @@ impl fmt::Display for Value {
             }
         };
 
-        match (&v.var_name, &v.op) {
+        match (&v._var_name, &v._op) {
             (Some(var_name), Some(op)) => {
                 write!(
                     f,
@@ -100,6 +105,7 @@ impl fmt::Display for Value {
     }
 }
 
+// Primitive operations and activation functions
 pub enum Operation {
     Add,
     Mul,
@@ -107,6 +113,7 @@ pub enum Operation {
     AF(Activation),
 }
 
+// Activation functions
 #[derive(Clone, Copy)]
 pub enum Activation {
     ReLU,
@@ -115,6 +122,7 @@ pub enum Activation {
     Sigmoid,
 }
 
+// Display trait for printing
 impl Operation {
     pub fn symbol(&self) -> char {
         match self {

@@ -1,3 +1,5 @@
 /target
 /Cargo.lock
 /.rustfmt.toml
+/examples/iris.rs
+/data/iris_data.csv

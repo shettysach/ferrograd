@@ -3,12 +3,14 @@ use rand::{distributions::Uniform, Rng};
 use std::fmt;
 
 pub struct Neuron {
-    pub w: Vec<Value>,
-    pub b: Value,
-    pub nonlin: Option<Activation>,
+    pub w: Vec<Value>,              // Weights
+    pub b: Value,                   // Bias
+    pub nonlin: Option<Activation>, // None if linear
 }
 
+// Main
 impl Neuron {
+    // Initialise with uniformly distributed random weights
     pub fn new(nin: i32, nonlin: Option<Activation>) -> Neuron {
         let mut rng = rand::thread_rng();
         let range = Uniform::<f64>::new(-1., 1.);
@@ -20,6 +22,7 @@ impl Neuron {
         }
     }
 
+    // Forward pass
     pub fn forward(&self, x: &Vec<Value>) -> Value {
         let act = self.w.iter().zip(x).map(|(wi, xi)| wi * xi).sum::<Value>()
             + &self.b;
@@ -33,6 +36,7 @@ impl Neuron {
         }
     }
 
+    // Weights and bias
     pub fn parameters(&self) -> Vec<Value> {
         let mut p = self.w.clone();
         p.insert(0, self.b.clone());
@@ -40,7 +44,9 @@ impl Neuron {
     }
 }
 
+// Extra
 impl Neuron {
+    // Name parameters as 'weight i' and 'bias'
     pub fn name_params(self) -> Neuron {
         let w = self
             .w
@@ -53,6 +59,7 @@ impl Neuron {
         Neuron { w, b, nonlin }
     }
 
+    // Name inputs as 'input i'
     pub fn name_inputs(&self, x: Vec<Value>) -> Vec<Value> {
         x.iter()
             .enumerate()
@@ -61,6 +68,7 @@ impl Neuron {
     }
 }
 
+// Display trait for printing
 impl fmt::Display for Neuron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let actv_fn = match self.nonlin {

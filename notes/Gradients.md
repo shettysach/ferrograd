@@ -1,6 +1,4 @@
-----
-
-###### Chain rule
+##### Chain rule
 
 $$\begin{aligned}
 s = f(z)\\
@@ -15,7 +13,7 @@ x.grad += ∂z/∂x * z.grad
 
 ----
 
-###### Addition
+##### Addition
 
 $$\begin{aligned}
 z = x+y
@@ -33,13 +31,13 @@ def _backward():
 
 ```rust
 fn add_backward(value: &V) {
-    value.prev[0].borrow_mut().grad += value.grad;
-    value.prev[1].borrow_mut().grad += value.grad;
+    value._prev[0].borrow_mut().grad += value.grad;
+    value._prev[1].borrow_mut().grad += value.grad;
 }
 ```
 ----
 
-###### Multiplication
+##### Multiplication
 
 $$\begin{aligned}
 z = xy
@@ -57,15 +55,15 @@ def _backward():
 
 ```rust
 fn mul_backward(value: &V) {
-    let data0 = value.prev[0].borrow().data;
-    let data1 = value.prev[1].borrow().data;
-    value.prev[0].borrow_mut().grad += data1 * value.grad;
-    value.prev[1].borrow_mut().grad += data0 * value.grad;
+    let data0 = value._prev[0].borrow().data;
+    let data1 = value._prev[1].borrow().data;
+    value._prev[0].borrow_mut().grad += data1 * value.grad;
+    value._prev[1].borrow_mut().grad += data0 * value.grad;
 }
 ```
 ----
 
-###### Power
+##### Power
 
 $$\begin{aligned}
 z = x^y
@@ -82,9 +80,9 @@ def _backward():
 
 ```rust
 Some(|value: &V| {
-    let base = value.prev[0].borrow().data;
-    let power = value.prev[1].borrow().data;
-    value.prev[0].borrow_mut().grad += 
+    let base = value._prev[0].borrow().data;
+    let power = value._prev[1].borrow().data;
+    value._prev[0].borrow_mut().grad += 
         power * base.powf(power - 1.0) * value.grad;
 }),
 ```
@@ -111,7 +109,7 @@ def _backward():
 
 ```rust
 Some(|value: &V| {
-    value.prev[0].borrow_mut().grad += 
+    value._prev[0].borrow_mut().grad += 
         if value.data > 0.0 { value.grad } else { 0.0 };
 }),
 ```
@@ -131,7 +129,7 @@ z = \max(0.01x,x)
 
 ```rust
 Some(|value: &V| {
-    value.prev[0].borrow_mut().grad += if value.data > 0.0 {
+    value._prev[0].borrow_mut().grad += if value.data > 0.0 {
         value.grad
     } else {
         0.01 * value.grad
@@ -152,7 +150,7 @@ x.grad += (1 - z.data ^ 2) * z.grad
 
 ```rust
 Some(|value: &V| {
-    value.prev[0].borrow_mut().grad +=
+    value._prev[0].borrow_mut().grad +=
         (1. - (value.data.powi(2))) * value.grad;
 }),
 ```
@@ -170,7 +168,7 @@ x.grad += z.data \* (1 - z.data) \* z.grad
 
 ```rust
 Some(|value: &V| {
-    value.prev[0].borrow_mut().grad += 
+    value._prev[0].borrow_mut().grad += 
         value.data * (1. - value.data) * value.grad;
 }),
 ```
@@ -205,9 +203,9 @@ y.grad += -1 \* z.grad
 $$\begin{aligned}
 z = x/y
 \\\\
-\frac{\partial{z}}{\partial{y}} = -y^{-2}
+\frac{\partial{z}}{\partial{y}} = -xy^{-2}
 \end{aligned}$$
 
-y,grad += -1 \* y.data ** (-2) \* z.grad
+y,grad += -1 \* x.data \* y.data ** (-2) \* z.grad
 
 ----

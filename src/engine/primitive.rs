@@ -1,7 +1,9 @@
 use super::{Operation, Value, V};
 use std::ops;
 
-// ADDITION
+// See /notes/Gradients.md
+
+// Addition
 
 #[opimps::impl_ops(ops::Add)]
 fn add(self: Value, rhs: Value) -> Value {
@@ -37,11 +39,11 @@ fn add(self: f64, rhs: Value) -> Value {
 }
 
 fn add_backward(value: &V) {
-    value.prev[0].borrow_mut().grad += value.grad;
-    value.prev[1].borrow_mut().grad += value.grad;
+    value._prev[0].borrow_mut().grad += value.grad;
+    value._prev[1].borrow_mut().grad += value.grad;
 }
 
-// MULTIPLICATION
+// Multiplication
 
 #[opimps::impl_ops(ops::Mul)]
 fn mul(self: Value, rhs: Value) -> Value {
@@ -77,22 +79,22 @@ fn mul(self: f64, rhs: Value) -> Value {
 }
 
 fn mul_backward(value: &V) {
-    let data0 = value.prev[0].borrow().data;
-    let data1 = value.prev[1].borrow().data;
-    value.prev[0].borrow_mut().grad += data1 * value.grad;
-    value.prev[1].borrow_mut().grad += data0 * value.grad;
+    let data0 = value._prev[0].borrow().data;
+    let data1 = value._prev[1].borrow().data;
+    value._prev[0].borrow_mut().grad += data1 * value.grad;
+    value._prev[1].borrow_mut().grad += data0 * value.grad;
 }
 
-// Power and Activation functions
+// Power
 
 impl Value {
     pub fn pow(&self, power: f64) -> Value {
         Value::init(
             self.borrow().data.powf(power),
             Some(|value: &V| {
-                let base = value.prev[0].borrow().data;
-                let power = value.prev[1].borrow().data;
-                value.prev[0].borrow_mut().grad +=
+                let base = value._prev[0].borrow().data;
+                let power = value._prev[1].borrow().data;
+                value._prev[0].borrow_mut().grad +=
                     power * base.powf(power - 1.0) * value.grad;
             }),
             vec![self.clone(), Value::new_const(power)],
@@ -101,6 +103,7 @@ impl Value {
         )
     }
 
+    // For initialising constants
     fn new_const(data: f64) -> Value {
         Value::init(data, None, Vec::new(), None, None)
     }

@@ -1,5 +1,8 @@
 use crate::engine::Value;
 
+// See /notes/Optimizers.md
+// https://towardsdatascience.com/adam-latest-trends-in-deep-learning-optimization-6be9a291375c
+
 pub struct Adam {
     params: Vec<Value>,
     lr: f64,
@@ -36,24 +39,22 @@ impl Adam {
 
     pub fn step(&mut self) {
         self.t += 1;
-        let lr_t = self.lr * (1.0 - self.beta2.powi(self.t as i32)).sqrt()
-            / (1.0 - self.beta1.powi(self.t as i32));
 
-        for (param, (m, v)) in self
-            .params
-            .iter_mut()
+        self.params
+            .iter()
             .zip(self.m.iter_mut().zip(self.v.iter_mut()))
-        {
-            let grad = param.borrow().grad;
+            .for_each(|(param, (m_t, v_t))| {
+                let grad = param.borrow().grad;
 
-            *m = self.beta1 * (*m + (1.0 - self.beta1) * grad);
-            *v = self.beta2 * (*v + (1.0 - self.beta2) * grad * grad);
+                *m_t = self.beta1 * *m_t + (1.0 - self.beta1) * grad;
+                *v_t = self.beta2 * *v_t + (1.0 - self.beta2) * grad * grad;
 
-            let m_t = *m / (1.0 - self.beta1.powi(self.t as i32));
-            let v_t = *v / (1.0 - self.beta2.powi(self.t as i32));
+                let mc_t = *m_t / (1.0 - self.beta1.powi(self.t as i32));
+                let vc_t = *v_t / (1.0 - self.beta2.powi(self.t as i32));
 
-            param.borrow_mut().data -= lr_t * m_t / (v_t.sqrt() + self.epsilon);
-        }
+                param.borrow_mut().data -=
+                    self.lr * mc_t / (vc_t.sqrt() + self.epsilon);
+            })
     }
 
     pub fn zero_grad(&self) {

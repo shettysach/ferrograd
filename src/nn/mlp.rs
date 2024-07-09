@@ -7,17 +7,20 @@ pub struct MultiLayerPerceptron {
 
 impl MultiLayerPerceptron {
     pub fn new(
-        nin: i32,
-        mut nouts: Vec<i32>,
+        nin: i32,            // Number of inputs
+        mut nouts: Vec<i32>, // Specifies number of neurons in each layer
         actv_fn: Activation,
     ) -> MultiLayerPerceptron {
+        // Insert number of inputs into 0th index
         nouts.insert(0, nin);
+        // Length-1 because final element is number of outputs
         let n = nouts.len() - 1;
 
         let layers = (0..n)
             .map(|i| {
                 let nin = nouts[i];
                 let nout = nouts[i + 1];
+                // Only last layer has activation function
                 let nonlin = if i == n - 1 { None } else { Some(actv_fn) };
 
                 Layer::new(nin, nout, nonlin)
@@ -27,10 +30,12 @@ impl MultiLayerPerceptron {
         MultiLayerPerceptron { layers }
     }
 
+    // Forwarding from first layer to the last
     pub fn forward(&self, x: Vec<Value>) -> Vec<Value> {
         self.layers.iter().fold(x, |x, layer| layer.forward(&x))
     }
 
+    // Weights and biases of the neurons in all the layers
     pub fn parameters(&self) -> Vec<Value> {
         self.layers.iter().flat_map(|l| l.parameters()).collect()
     }

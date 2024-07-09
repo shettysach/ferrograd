@@ -5,7 +5,8 @@ use micrograd::{
 };
 
 fn main() {
-    let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::ReLU);
+    let model =
+        MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::LeakyReLU);
     let p = model.parameters().len();
     println!("Number of parameters = {}\n", p);
 
@@ -38,10 +39,11 @@ fn main() {
                         Value::new(x as f64 / bound as f64 * 2.0),
                         Value::new(-y as f64 / bound as f64 * 2.0),
                     ])[0];
+
                     if k.borrow().data > 0.0 {
                         String::from("■")
                     } else {
-                        String::from("·")
+                        String::from("□")
                     }
                 })
                 .collect()
