@@ -14,12 +14,12 @@ impl Layer {
         }
     }
 
-    // Forward input through all neurons of the layer
+    // Forward input through all the neurons of the layer
     pub fn forward(&self, x: &Vec<Value>) -> Vec<Value> {
         self.neurons.iter().map(|n| n.forward(x)).collect()
     }
 
-    // Weights and biases of the neurons in the layer
+    // Weights and biases of the neurons of the layer
     pub fn parameters(&self) -> Vec<Value> {
         self.neurons.iter().flat_map(|n| n.parameters()).collect()
     }

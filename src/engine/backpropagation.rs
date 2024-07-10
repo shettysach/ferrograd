@@ -40,6 +40,7 @@ impl Value {
     }
 }
 
+// Traits
 impl Hash for Value {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.borrow()._uuid.hash(state);
@@ -56,6 +57,7 @@ impl Eq for Value {}
 
 // Extra
 impl Value {
+    // Draw tree with final output as root and inputs as leaves
     pub fn tree(&self) -> Tree<Value> {
         let mut root = Tree::new(self.clone());
         if self.borrow()._op.is_some() {

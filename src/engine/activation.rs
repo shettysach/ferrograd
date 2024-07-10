@@ -1,5 +1,4 @@
 use super::{Activation, Operation, Value, V};
-use std::f64::consts::E;
 
 // See /notes/Gradients.md
 
@@ -19,7 +18,6 @@ impl Value {
 
     pub fn leaky_relu(&self) -> Value {
         let x = self.borrow().data;
-
         Value::init(
             x.max(0.01 * x),
             Some(|value: &V| {
@@ -36,8 +34,7 @@ impl Value {
     }
 
     pub fn tanh(&self) -> Value {
-        let e2x = E.powf(2.0 * self.borrow().data);
-
+        let e2x = (2.0 * self.borrow().data).exp();
         Value::init(
             (e2x - 1.0) / (e2x + 1.0),
             Some(|value: &V| {
@@ -51,10 +48,9 @@ impl Value {
     }
 
     pub fn sigmoid(&self) -> Value {
-        let enx = E.powf(-1.0 * self.borrow().data);
-
+        let em1x = (-1.0 * self.borrow().data).exp();
         Value::init(
-            1.0 / (1.0 + enx),
+            1.0 / (1.0 + em1x),
             Some(|value: &V| {
                 value._prev[0].borrow_mut().grad +=
                     value.data * (1.0 - value.data) * value.grad;

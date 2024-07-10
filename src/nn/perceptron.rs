@@ -20,8 +20,8 @@ impl MultiLayerPerceptron {
             .map(|i| {
                 let nin = nouts[i];
                 let nout = nouts[i + 1];
-                // Only last layer has activation function
                 let nonlin = if i == n - 1 { None } else { Some(actv_fn) };
+                // Only the last layer has the activation function
 
                 Layer::new(nin, nout, nonlin)
             })
@@ -35,7 +35,7 @@ impl MultiLayerPerceptron {
         self.layers.iter().fold(x, |x, layer| layer.forward(&x))
     }
 
-    // Weights and biases of the neurons in all the layers
+    // Weights and biases of all the neurons of the perceptron
     pub fn parameters(&self) -> Vec<Value> {
         self.layers.iter().flat_map(|l| l.parameters()).collect()
     }

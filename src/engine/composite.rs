@@ -74,7 +74,7 @@ fn div_assign(self: Value, rhs: Value) {
     self.borrow_mut()._var_name = name;
 }
 
-// Sum trait
+// Sum
 
 impl Sum for Value {
     fn sum<I>(iter: I) -> Self

@@ -1,7 +1,7 @@
 #### micrograd
 
 - A small autograd engine, inspired from [karpathy/micrograd](https://github.com/karpathy/micrograd) and  [Mathemmagician/rustygrad](https://github.com/Mathemmagician/rustygrad), with a few more features, such as additional activation functions and optimizers.
-- See `/notes/Gradients.md` for explanation of gradients and backward functions, and `/notes/Optimizers.md` for equations and step functions of optimizers.
+- See `/notes/Gradients.md` for explanation of gradients and backward functions, and `/notes/Optimizers.md` for the equations and step functions of optimizers.
 
 ```rust
 use micrograd::engine::Value;
