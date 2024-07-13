@@ -3,9 +3,8 @@ use std::collections::HashSet;
 use std::hash::Hash;
 use termtree::Tree;
 
-// Main
 impl Value {
-    // Backpropagation function
+    /// Performs backpropagation to compute gradients for all Values in the graph.
     pub fn backward(&self) {
         let mut topo: Vec<Value> = vec![];
         let mut visited: HashSet<Value> = HashSet::new();
@@ -24,7 +23,7 @@ impl Value {
         });
     }
 
-    // Topological sort for order
+    /// Topological sort for order.
     fn topological_sort(
         &self,
         topo: &mut Vec<Value>,
@@ -40,7 +39,6 @@ impl Value {
     }
 }
 
-// Traits
 impl Hash for Value {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.borrow()._uuid.hash(state);
@@ -55,9 +53,10 @@ impl PartialEq for Value {
 
 impl Eq for Value {}
 
-// Extra
+// --- Extras ---
+
 impl Value {
-    // Draw tree with final output as root and inputs as leaves
+    /// Returns tree with final output as root and inputs as leaves.
     pub fn tree(&self) -> Tree<Value> {
         let mut root = Tree::new(self.clone());
         if self.borrow()._op.is_some() {

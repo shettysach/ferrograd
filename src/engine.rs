@@ -2,15 +2,15 @@ use std::{cell::RefCell, fmt, ops, rc::Rc};
 use uuid::Uuid;
 
 mod activation;
-mod backpropagation;
-mod composite;
-mod primitive;
+mod backprop;
+mod composite_ops;
+mod primitive_ops;
 
-// Smart pointer to V
+/// Scalar with data and gradient.
 #[derive(Clone)]
-pub struct Value(Rc<RefCell<V>>);
+pub struct Value(Rc<RefCell<V>>); // Smart pointer to V
 
-// Holds data
+// Struct that holds the data
 pub struct V {
     pub data: f64,
     pub grad: f64,
@@ -30,7 +30,6 @@ impl ops::Deref for Value {
     }
 }
 
-// Main
 impl Value {
     pub fn init(
         data: f64,
@@ -50,18 +49,9 @@ impl Value {
         })))
     }
 
-    // For initialising variables
+    /// Initialise new Value.
     pub fn new(data: f64) -> Value {
         Value::init(data, None, Vec::new(), None, Some(String::new()))
-    }
-}
-
-// Extra
-impl Value {
-    // changes var_name
-    pub fn with_name(self, var_name: &str) -> Value {
-        self.borrow_mut()._var_name = Some(var_name.to_string());
-        self
     }
 }
 
@@ -105,7 +95,7 @@ impl fmt::Display for Value {
     }
 }
 
-// Primitive operations and activation functions
+/// Primitive scalar operations and activation functions.
 pub enum Operation {
     Add,
     Mul,
@@ -113,7 +103,7 @@ pub enum Operation {
     AF(Activation),
 }
 
-// Activation functions
+/// Activation functions.
 #[derive(Clone, Copy)]
 pub enum Activation {
     ReLU,
@@ -123,9 +113,9 @@ pub enum Activation {
 }
 
 // Display trait for printing
-impl Operation {
-    pub fn symbol(&self) -> char {
-        match self {
+impl fmt::Display for Operation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let symbol = match self {
             Operation::Add => '+',
             Operation::Mul => '*',
             Operation::Pow => '^',
@@ -133,12 +123,17 @@ impl Operation {
             Operation::AF(Activation::LeakyReLU) => 'L',
             Operation::AF(Activation::Tanh) => 't',
             Operation::AF(Activation::Sigmoid) => 'σ',
-        }
+        };
+        write!(f, "{}", symbol)
     }
 }
 
-impl fmt::Display for Operation {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", &self.symbol())
+// --- Extras ---
+
+impl Value {
+    /// Assign var_name to the Value
+    pub fn with_name(self, var_name: &str) -> Value {
+        self.borrow_mut()._var_name = Some(var_name.to_string());
+        self
     }
 }

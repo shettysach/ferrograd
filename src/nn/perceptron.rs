@@ -1,19 +1,20 @@
 use crate::engine::{Activation, Value};
 use crate::nn::Layer;
+use std::fmt;
 
+/// Artificial neural network with dense layers and a non-linear activation function.
 pub struct MultiLayerPerceptron {
     layers: Vec<Layer>,
 }
 
 impl MultiLayerPerceptron {
+    /// Initialise new MLP.
     pub fn new(
-        nin: i32,            // Number of inputs
-        mut nouts: Vec<i32>, // Specifies number of neurons in each layer
+        nin: u32,
+        mut nouts: Vec<u32>,
         actv_fn: Activation,
     ) -> MultiLayerPerceptron {
-        // Insert number of inputs into 0th index
         nouts.insert(0, nin);
-        // Length-1 because final element is number of outputs
         let n = nouts.len() - 1;
 
         let layers = (0..n)
@@ -21,7 +22,6 @@ impl MultiLayerPerceptron {
                 let nin = nouts[i];
                 let nout = nouts[i + 1];
                 let nonlin = if i == n - 1 { None } else { Some(actv_fn) };
-                // Only the last layer has the activation function
 
                 Layer::new(nin, nout, nonlin)
             })
@@ -30,13 +30,25 @@ impl MultiLayerPerceptron {
         MultiLayerPerceptron { layers }
     }
 
-    // Forwarding from first layer to the last
-    pub fn forward(&self, x: Vec<Value>) -> Vec<Value> {
-        self.layers.iter().fold(x, |x, layer| layer.forward(&x))
+    /// Forward pass of input x through the MLP.
+    pub fn forward(&self, x: &Vec<Value>) -> Vec<Value> {
+        self.layers
+            .iter()
+            .fold(x.clone(), |x, layer| layer.forward(&x))
     }
 
-    // Weights and biases of all the neurons of the perceptron
+    /// Returns weights and biases of all the neurons of the perceptron.
     pub fn parameters(&self) -> Vec<Value> {
         self.layers.iter().flat_map(|l| l.parameters()).collect()
+    }
+}
+
+// Display trait for printing
+impl fmt::Display for MultiLayerPerceptron {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let _ = self.layers.iter().enumerate().for_each(|(i, layer)| {
+            write!(f, "layer {} - {}\n", i, layer).unwrap();
+        });
+        Ok(())
     }
 }

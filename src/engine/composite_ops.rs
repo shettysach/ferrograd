@@ -77,7 +77,7 @@ fn div_assign(self: Value, rhs: Value) {
 // Sum
 
 impl Sum for Value {
-    fn sum<I>(iter: I) -> Self
+    fn sum<I>(iter: I) -> Value
     where
         I: Iterator<Item = Self>,
     {

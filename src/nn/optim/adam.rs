@@ -3,6 +3,7 @@ use crate::engine::Value;
 // See /notes/Optimizers.md
 // https://towardsdatascience.com/adam-latest-trends-in-deep-learning-optimization-6be9a291375c
 
+/// Adam optimizer.
 pub struct Adam {
     params: Vec<Value>,
     lr: f64,
@@ -15,6 +16,7 @@ pub struct Adam {
 }
 
 impl Adam {
+    /// Initialise new optimizer.
     pub fn new(
         params: Vec<Value>,
         lr: f64,
@@ -37,6 +39,7 @@ impl Adam {
         }
     }
 
+    /// Perform a single optimizer step.
     pub fn step(&mut self) {
         self.t += 1;
 
@@ -57,6 +60,7 @@ impl Adam {
             })
     }
 
+    /// Set the gradients of all the parameters to zero.
     pub fn zero_grad(&self) {
         for p in &self.params {
             p.borrow_mut().grad = 0.0;
