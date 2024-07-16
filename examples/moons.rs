@@ -1,9 +1,9 @@
 use micrograd::{
     engine::{Activation, Value},
+    loss::HingeEmbeddingLoss,
     metrics::BinaryAccuracy,
     nn::{
-        loss::HingeEmbeddingLoss,
-        optim::{adam::Adam, l2_regularization},
+        optim::{l2_regularization, SGD},
         MultiLayerPerceptron,
     },
 };
@@ -14,14 +14,13 @@ fn main() {
     println!("Model - \n{}", model);
     println!("Number of parameters = {}\n", model.parameters().len());
 
-    let (xs, ys) = load_moons_data();
-    let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 0.00000001);
+    let (xs, ys) = load_data();
+    let mut optim = SGD::new(model.parameters(), 0.1, 0.9);
     let loss = HingeEmbeddingLoss::new(1.0);
     let accuracy = BinaryAccuracy::new(0.0);
 
     (0..100).for_each(|k| {
-        let ypred: Vec<Vec<Value>> =
-            xs.iter().map(|xrow| model.forward(&xrow)).collect();
+        let ypred: Vec<Vec<Value>> = model.forward_batch(&xs);
 
         let data_loss = loss.loss(&ypred, &ys);
         let reg_loss = l2_regularization(0.0001, model.parameters());
@@ -78,7 +77,7 @@ pub struct DataPoint {
     pub label: f64,
 }
 
-fn read_moons_csv(filename: &str) -> Vec<DataPoint> {
+fn read_csv(filename: &str) -> Vec<DataPoint> {
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
 
@@ -98,8 +97,8 @@ fn read_moons_csv(filename: &str) -> Vec<DataPoint> {
         .collect()
 }
 
-fn load_moons_data() -> (Vec<Vec<Value>>, Vec<Vec<Value>>) {
-    let data_points = read_moons_csv("data/moons_data.csv");
+fn load_data() -> (Vec<Vec<Value>>, Vec<Vec<Value>>) {
+    let data_points = read_csv("data/moons_data.csv");
 
     let (xs, ys) = data_points
         .iter()

@@ -37,6 +37,11 @@ impl MultiLayerPerceptron {
             .fold(x.clone(), |x, layer| layer.forward(&x))
     }
 
+    /// Forward pass of batch of input xs through the MLP.
+    pub fn forward_batch(&self, xs: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
+        xs.iter().map(|xrow| self.forward(&xrow)).collect()
+    }
+
     /// Returns weights and biases of all the neurons of the perceptron.
     pub fn parameters(&self) -> Vec<Value> {
         self.layers.iter().flat_map(|l| l.parameters()).collect()

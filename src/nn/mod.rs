@@ -2,7 +2,6 @@ mod layer;
 mod neuron;
 mod perceptron;
 
-pub mod loss;
 pub mod optim;
 
 pub use layer::*;

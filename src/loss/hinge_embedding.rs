@@ -19,7 +19,7 @@ impl HingeEmbeddingLoss {
                     .iter()
                     .zip(ys_i.iter())
                     .map(|(ypred_j, ys_j)| {
-                        (self.margin + -ys_j * ypred_j).relu()
+                        (self.margin - ys_j * ypred_j).relu()
                     })
                     .sum::<Value>()
                     / ni

@@ -20,6 +20,11 @@ impl Layer {
         self.neurons.iter().map(|n| n.forward(x)).collect()
     }
 
+    /// Forward pass of batch of input xs through the Layer.
+    pub fn forward_batch(&self, xs: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
+        xs.iter().map(|xrow| self.forward(&xrow)).collect()
+    }
+
     /// Returns vector of weights and biases of the Neurons of the Layer.
     pub fn parameters(&self) -> Vec<Value> {
         self.neurons.iter().flat_map(|n| n.parameters()).collect()

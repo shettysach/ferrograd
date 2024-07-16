@@ -1,11 +1,6 @@
 use std::{cell::RefCell, fmt, ops, rc::Rc};
 use uuid::Uuid;
 
-mod activation;
-mod backprop;
-mod composite_ops;
-mod primitive_ops;
-
 /// Scalar with data and gradient.
 #[derive(Clone)]
 pub struct Value(Rc<RefCell<V>>); // Smart pointer to V
@@ -100,6 +95,7 @@ pub enum Operation {
     Add,
     Mul,
     Pow,
+    Log,
     AF(Activation),
 }
 
@@ -119,6 +115,7 @@ impl fmt::Display for Operation {
             Operation::Add => '+',
             Operation::Mul => '*',
             Operation::Pow => '^',
+            Operation::Log => 'l',
             Operation::AF(Activation::ReLU) => 'R',
             Operation::AF(Activation::LeakyReLU) => 'L',
             Operation::AF(Activation::Tanh) => 't',

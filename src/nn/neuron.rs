@@ -36,6 +36,11 @@ impl Neuron {
         }
     }
 
+    /// Forward pass of batch of input xs through the Neuron.
+    pub fn forward_batch(&self, xs: &Vec<Vec<Value>>) -> Vec<Value> {
+        xs.iter().map(|xrow| self.forward(&xrow)).collect()
+    }
+
     /// Returns vector of bias and weights.
     pub fn parameters(&self) -> Vec<Value> {
         let mut p = self.w.clone();

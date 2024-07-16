@@ -103,6 +103,21 @@ impl Value {
         )
     }
 
+    pub fn log(&self, base: f64) -> Value {
+        Value::init(
+            self.borrow().data.log(base),
+            Some(|value: &V| {
+                let arg = value._prev[0].borrow().data;
+                let base = value._prev[1].borrow().data;
+                value._prev[0].borrow_mut().grad +=
+                    value.grad / (arg * base.ln());
+            }),
+            vec![self.clone(), Value::new_const(base)],
+            Some(Operation::Pow),
+            Some(String::new()),
+        )
+    }
+
     // For initialising constants
     fn new_const(data: f64) -> Value {
         Value::init(data, None, Vec::new(), None, None)
