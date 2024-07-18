@@ -3,10 +3,7 @@
 - A small autograd engine, inspired from [karpathy/micrograd](https://github.com/karpathy/micrograd), with a few more features, such as additional activation functions, loss criterions, optimizers and accuracy metrics.
 - See `/notes/Gradients.md` for explanation of gradients and backward functions, and `/notes/Optimizers.md` for the equations and step functions of optimizers.
 - The library lets you create neurons, dense layers and multilayer perceptrons, for non-linear classification tasks.
-- Currently has criterions and metrics for binary classification. 
-
-> TODO: Multiclass classification support.
-
+- Currently has criterions and metrics for binary classification.
 
 #### Examples
 
@@ -43,16 +40,18 @@ fn main() {
     println!("b.grad = {:.4}", b.borrow().grad);
 }
 ```
+
 ```console
 cargo run --example readme
 ```
+
 ```
 g.data = 24.7041
 a.grad = 138.8338
 b.grad = 645.5773
 ```
 
-----
+---
 
 ##### Neuron
 
@@ -77,9 +76,11 @@ fn main() {
     println!("Backward pass:\n{}", y.tree());
 }
 ```
+
 ```console
 cargo run --example neuron
 ```
+
 ```
 Forward pass:
 R data = 0.326, grad = 0.000
@@ -106,7 +107,7 @@ R data = 0.326, grad = 1.000
     └── data = 0.000, grad = 1.000 ← bias
 ```
 
-----
+---
 
 ##### scikit-learn's make_moons dataset classification
 
@@ -155,9 +156,11 @@ fn main() {
     });
 }
 ```
+
 ```console
 cargo run --example moons
 ```
+
 ```
 ASCII contour graph -
 ■ > 0.0

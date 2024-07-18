@@ -85,7 +85,7 @@ fn mul_backward(value: &V) {
     value._prev[1].borrow_mut().grad += data0 * value.grad;
 }
 
-// Power
+// Power and Logarithm
 
 impl Value {
     pub fn pow(&self, power: f64) -> Value {
