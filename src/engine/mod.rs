@@ -1,7 +1,7 @@
-mod activation;
+mod activ_fns;
 mod backprop;
-mod composite_ops;
-mod primitive_ops;
+mod comp_ops;
+mod prim_ops;
 mod value;
 
 pub use value::*;

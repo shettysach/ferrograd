@@ -1,8 +1,5 @@
 use crate::engine::Value;
 
-// See /notes/Optimizers.md
-// https://towardsdatascience.com/adam-latest-trends-in-deep-learning-optimization-6be9a291375c
-
 /// Adam optimizer.
 pub struct Adam {
     params: Vec<Value>,

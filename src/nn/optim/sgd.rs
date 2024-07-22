@@ -1,8 +1,5 @@
 use crate::engine::Value;
 
-// See /notes/Optimizers.md
-// https://towardsdatascience.com/stochastic-gradient-descent-with-momentum-a84097641a5d
-
 /// Stochastic Gradient Descent optimizer with momentum.
 pub struct SGD {
     params: Vec<Value>,

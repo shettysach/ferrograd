@@ -1,8 +1,6 @@
 use super::Value;
 use std::{iter::Sum, ops};
 
-// See /notes/Gradients.md
-
 // Negation
 
 #[opimps::impl_uni_ops(ops::Neg)]
@@ -82,11 +80,9 @@ impl Sum for Value {
         I: Iterator<Item = Self>,
     {
         let mut iter = iter;
-        let first = match iter.next() {
-            Some(first) => first,
-            None => return Value::new(0.0),
-        };
-
-        iter.fold(first, |acc, val| acc + val)
+        match iter.next() {
+            Some(first) => iter.fold(first, |acc, val| acc + val),
+            None => Value::new(0.0),
+        }
     }
 }

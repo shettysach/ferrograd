@@ -1,8 +1,6 @@
 use super::{Operation, Value, V};
 use std::ops;
 
-// See /notes/Gradients.md
-
 // Addition
 
 #[opimps::impl_ops(ops::Add)]
@@ -85,7 +83,7 @@ fn mul_backward(value: &V) {
     value._prev[1].borrow_mut().grad += data0 * value.grad;
 }
 
-// Power and Logarithm
+// Power, Ln and Exp
 
 impl Value {
     pub fn pow(&self, power: f64) -> Value {
@@ -103,17 +101,27 @@ impl Value {
         )
     }
 
-    pub fn log(&self, base: f64) -> Value {
+    pub fn ln(&self) -> Value {
         Value::init(
-            self.borrow().data.log(base),
+            self.borrow().data.ln(),
             Some(|value: &V| {
-                let arg = value._prev[0].borrow().data;
-                let base = value._prev[1].borrow().data;
                 value._prev[0].borrow_mut().grad +=
-                    value.grad / (arg * base.ln());
+                    value.grad / value._prev[0].borrow().data;
             }),
-            vec![self.clone(), Value::new_const(base)],
-            Some(Operation::Pow),
+            vec![self.clone()],
+            Some(Operation::Ln),
+            Some(String::new()),
+        )
+    }
+
+    pub fn exp(&self) -> Value {
+        Value::init(
+            self.borrow().data.exp(),
+            Some(|value: &V| {
+                value._prev[0].borrow_mut().grad += value.data * value.grad;
+            }),
+            vec![self.clone()],
+            Some(Operation::Exp),
             Some(String::new()),
         )
     }

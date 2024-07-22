@@ -31,15 +31,10 @@ impl MultiLayerPerceptron {
     }
 
     /// Forward pass of input x through the MLP.
-    pub fn forward(&self, x: &Vec<Value>) -> Vec<Value> {
+    pub fn forward(&self, x: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
         self.layers
             .iter()
             .fold(x.clone(), |x, layer| layer.forward(&x))
-    }
-
-    /// Forward pass of batch of input xs through the MLP.
-    pub fn forward_batch(&self, xs: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
-        xs.iter().map(|xrow| self.forward(&xrow)).collect()
     }
 
     /// Returns weights and biases of all the neurons of the perceptron.
@@ -48,7 +43,6 @@ impl MultiLayerPerceptron {
     }
 }
 
-// Display trait for printing
 impl fmt::Display for MultiLayerPerceptron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let _ = self.layers.iter().enumerate().for_each(|(i, layer)| {

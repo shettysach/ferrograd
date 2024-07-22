@@ -1,6 +1,6 @@
 use micrograd::{
     engine::{Activation, Value},
-    loss::HingeEmbeddingLoss,
+    loss::HingeLoss,
     metrics::BinaryAccuracy,
     nn::{
         optim::{l2_regularization, SGD},
@@ -9,19 +9,18 @@ use micrograd::{
 };
 
 fn main() {
+    let (xs, ys) = load_data();
     let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::ReLU);
 
     println!("Model - \n{}", model);
     println!("Number of parameters = {}\n", model.parameters().len());
 
-    let (xs, ys) = load_data();
     let mut optim = SGD::new(model.parameters(), 0.1, 0.9);
-    let loss = HingeEmbeddingLoss::new(1.0);
+    let loss = HingeLoss::new(1.0);
     let accuracy = BinaryAccuracy::new(0.0);
 
     (0..100).for_each(|k| {
-        let ypred: Vec<Vec<Value>> = model.forward_batch(&xs);
-
+        let ypred: Vec<Vec<Value>> = model.forward(&xs);
         let data_loss = loss.loss(&ypred, &ys);
         let reg_loss = l2_regularization(0.0001, model.parameters());
         let total_loss = data_loss + reg_loss;
@@ -42,19 +41,19 @@ fn main() {
 
     println!("\nASCII contour graph - \n■ > 0.0  \n□ <= 0.0 ");
     let bound = 15;
-    let grid: Vec<Vec<String>> = (-bound..bound)
+    let grid: Vec<Vec<&str>> = (-bound..bound)
         .map(|y| {
             (-bound..bound)
                 .map(|x| {
                     let k = &model.forward(&vec![
-                        Value::new(x as f64 / bound as f64 * 2.0),
-                        Value::new(-y as f64 / bound as f64 * 2.0),
-                    ])[0];
+                        vec![Value::new(x as f64 / bound as f64 * 2.0)],
+                        vec![Value::new(-y as f64 / bound as f64 * 2.0)],
+                    ])[0][0];
 
                     if k.borrow().data > 0.0 {
-                        String::from("■")
+                        "■"
                     } else {
-                        String::from("□")
+                        "□"
                     }
                 })
                 .collect()
@@ -100,16 +99,22 @@ fn read_csv(filename: &str) -> Vec<DataPoint> {
 fn load_data() -> (Vec<Vec<Value>>, Vec<Vec<Value>>) {
     let data_points = read_csv("data/moons_data.csv");
 
-    let (xs, ys) = data_points
+    let (x0, x1) = data_points
         .iter()
         .map(|data_point| {
-            let x_vec =
-                vec![Value::new(data_point.x), Value::new(data_point.y)];
-            let y_vec = vec![Value::new(data_point.label)];
-
-            (x_vec, y_vec)
+            let x0_vec = Value::new(data_point.x);
+            let x1_vec = Value::new(data_point.y);
+            (x0_vec, x1_vec)
         })
         .collect();
+
+    let y0 = data_points
+        .iter()
+        .map(|data_point| Value::new(data_point.label))
+        .collect();
+
+    let xs = vec![x0, x1];
+    let ys = vec![y0];
 
     (xs, ys)
 }

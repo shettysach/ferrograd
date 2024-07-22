@@ -16,13 +16,8 @@ impl Layer {
     }
 
     /// Forward pass of input x through all the Neurons of the Layer.
-    pub fn forward(&self, x: &Vec<Value>) -> Vec<Value> {
+    pub fn forward(&self, x: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
         self.neurons.iter().map(|n| n.forward(x)).collect()
-    }
-
-    /// Forward pass of batch of input xs through the Layer.
-    pub fn forward_batch(&self, xs: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
-        xs.iter().map(|xrow| self.forward(&xrow)).collect()
     }
 
     /// Returns vector of weights and biases of the Neurons of the Layer.
@@ -31,7 +26,6 @@ impl Layer {
     }
 }
 
-// Display trait for printing
 impl fmt::Display for Layer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.neurons.iter().next() {

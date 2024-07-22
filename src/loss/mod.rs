@@ -1,3 +1,3 @@
-mod hinge_embedding;
+mod hinge;
 
-pub use hinge_embedding::*;
+pub use hinge::*;

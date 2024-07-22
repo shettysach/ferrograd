@@ -1,6 +1,5 @@
 use super::Value;
 use std::collections::HashSet;
-use std::hash::Hash;
 use termtree::Tree;
 
 impl Value {
@@ -15,7 +14,7 @@ impl Value {
         // ∂z/∂z = 1
         self.borrow_mut().grad = 1.0;
 
-        // Backpropagation through the topology
+        // Backpropagation through the DAG
         topo.iter().for_each(|v| {
             if let Some(backprop) = v.borrow()._backward {
                 backprop(&v.borrow());
@@ -38,20 +37,6 @@ impl Value {
         }
     }
 }
-
-impl Hash for Value {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.borrow()._uuid.hash(state);
-    }
-}
-
-impl PartialEq for Value {
-    fn eq(&self, other: &Value) -> bool {
-        self.borrow()._uuid == other.borrow()._uuid
-    }
-}
-
-impl Eq for Value {}
 
 // --- Extras ---
 

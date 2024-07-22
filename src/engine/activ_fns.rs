@@ -1,7 +1,5 @@
 use super::{Activation, Operation, Value, V};
 
-// See /notes/Gradients.md
-
 impl Value {
     pub fn relu(&self) -> Value {
         Value::init(

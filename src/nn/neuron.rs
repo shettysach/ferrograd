@@ -23,22 +23,28 @@ impl Neuron {
     }
 
     /// Forward pass of input x through the Neuron.
-    pub fn forward(&self, x: &Vec<Value>) -> Value {
-        let act = self.w.iter().zip(x).map(|(wi, xi)| wi * xi).sum::<Value>()
-            + &self.b;
+    pub fn forward(&self, x: &Vec<Vec<Value>>) -> Vec<Value> {
+        let len = x.iter().next().expect("Empty input").len();
 
-        match self.nonlin {
-            Some(Activation::ReLU) => act.relu(),
-            Some(Activation::LeakyReLU) => act.leaky_relu(),
-            Some(Activation::Tanh) => act.tanh(),
-            Some(Activation::Sigmoid) => act.sigmoid(),
-            None => act,
-        }
-    }
+        (0..len)
+            .map(|i| {
+                let act = self
+                    .w
+                    .iter()
+                    .zip(x.iter().map(|row| &row[i]))
+                    .map(|(wi, xi)| wi * xi)
+                    .sum::<Value>()
+                    + &self.b;
 
-    /// Forward pass of batch of input xs through the Neuron.
-    pub fn forward_batch(&self, xs: &Vec<Vec<Value>>) -> Vec<Value> {
-        xs.iter().map(|xrow| self.forward(&xrow)).collect()
+                match self.nonlin {
+                    Some(Activation::ReLU) => act.relu(),
+                    Some(Activation::LeakyReLU) => act.leaky_relu(),
+                    Some(Activation::Tanh) => act.tanh(),
+                    Some(Activation::Sigmoid) => act.sigmoid(),
+                    None => act,
+                }
+            })
+            .collect()
     }
 
     /// Returns vector of bias and weights.
@@ -49,7 +55,6 @@ impl Neuron {
     }
 }
 
-// Display trait for printing
 impl fmt::Display for Neuron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.nonlin {
@@ -62,7 +67,7 @@ impl fmt::Display for Neuron {
 // -- Extras --
 
 impl Neuron {
-    /// Assign var_names for parameters as 'weight i' and 'bias'.
+    /// Assign var_names for parameters as `weight i` and `bias`.
     pub fn name_params(self) -> Neuron {
         let w = self
             .w
@@ -75,11 +80,19 @@ impl Neuron {
         Neuron { w, b, nonlin }
     }
 
-    /// Assign var_names for inputs as 'input i'.
-    pub fn name_inputs(&self, x: Vec<Value>) -> Vec<Value> {
+    /// Assign var_names for inputs as `xi sj`,
+    /// where `xi` stands for feature i and `sj` stands for sample j.
+    pub fn name_inputs(&self, x: Vec<Vec<Value>>) -> Vec<Vec<Value>> {
         x.iter()
             .enumerate()
-            .map(|(i, xi)| xi.clone().with_name(&format!("input {i}")))
+            .map(|(i, row)| {
+                row.iter()
+                    .enumerate()
+                    .map(|(j, xij)| {
+                        xij.clone().with_name(&format!("x{i} s{j}"))
+                    })
+                    .collect()
+            })
             .collect()
     }
 }

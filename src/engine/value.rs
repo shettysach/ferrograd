@@ -1,4 +1,4 @@
-use std::{cell::RefCell, fmt, ops, rc::Rc};
+use std::{cell::RefCell, fmt, hash::Hash, ops, rc::Rc};
 use uuid::Uuid;
 
 /// Scalar with data and gradient.
@@ -50,7 +50,20 @@ impl Value {
     }
 }
 
-// Display trait for printing
+impl Hash for Value {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.borrow()._uuid.hash(state);
+    }
+}
+
+impl PartialEq for Value {
+    fn eq(&self, other: &Value) -> bool {
+        self.borrow()._uuid == other.borrow()._uuid
+    }
+}
+
+impl Eq for Value {}
+
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let v = &self.borrow();
@@ -90,12 +103,13 @@ impl fmt::Display for Value {
     }
 }
 
-/// Primitive scalar operations and activation functions.
+/// Scalar operations and activation functions.
 pub enum Operation {
     Add,
     Mul,
     Pow,
-    Log,
+    Ln,
+    Exp,
     AF(Activation),
 }
 
@@ -108,18 +122,18 @@ pub enum Activation {
     Sigmoid,
 }
 
-// Display trait for printing
 impl fmt::Display for Operation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let symbol = match self {
-            Operation::Add => '+',
-            Operation::Mul => '*',
-            Operation::Pow => '^',
-            Operation::Log => 'l',
-            Operation::AF(Activation::ReLU) => 'R',
-            Operation::AF(Activation::LeakyReLU) => 'L',
-            Operation::AF(Activation::Tanh) => 't',
-            Operation::AF(Activation::Sigmoid) => 'σ',
+            Operation::Add => "+",
+            Operation::Mul => "*",
+            Operation::Pow => "^",
+            Operation::Ln => "ln",
+            Operation::Exp => "exp",
+            Operation::AF(Activation::ReLU) => "ReLU",
+            Operation::AF(Activation::LeakyReLU) => "LeakyReLU",
+            Operation::AF(Activation::Tanh) => "tanh",
+            Operation::AF(Activation::Sigmoid) => "σ",
         };
         write!(f, "{}", symbol)
     }
