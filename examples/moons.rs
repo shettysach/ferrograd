@@ -3,7 +3,7 @@ use micrograd::{
     loss::HingeLoss,
     metrics::BinaryAccuracy,
     nn::{
-        optim::{l2_regularization, SGD},
+        optim::{l2_regularization, Adam},
         MultiLayerPerceptron,
     },
 };
@@ -15,7 +15,7 @@ fn main() {
     println!("Model - \n{}", model);
     println!("Number of parameters = {}\n", model.parameters().len());
 
-    let mut optim = SGD::new(model.parameters(), 0.1, 0.9);
+    let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 0.00000001);
     let loss = HingeLoss::new(1.0);
     let accuracy = BinaryAccuracy::new(0.0);
 

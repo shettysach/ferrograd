@@ -67,21 +67,22 @@ impl fmt::Display for Neuron {
 // -- Extras --
 
 impl Neuron {
-    /// Assign var_names for parameters as `weight i` and `bias`.
+    /// Assign var_names for parameters as `weight[i]` and `bias`.
     pub fn name_params(self) -> Neuron {
         let w = self
             .w
             .iter()
             .enumerate()
-            .map(|(i, wi)| wi.clone().with_name(&format!("weight {i}")))
+            .map(|(i, wi)| wi.clone().with_name(&format!("weight[{i}]")))
             .collect();
         let b = self.b.clone().with_name("bias");
         let nonlin = self.nonlin;
         Neuron { w, b, nonlin }
     }
 
-    /// Assign var_names for inputs as `xi sj`,
-    /// where `xi` stands for feature i and `sj` stands for sample j.
+    /// Assign var_names for inputs as `x[i][j]`,
+    /// where `i` stands for the ith feature
+    /// and `j` stands for the jth sample of that feature.
     pub fn name_inputs(&self, x: Vec<Vec<Value>>) -> Vec<Vec<Value>> {
         x.iter()
             .enumerate()
@@ -89,7 +90,7 @@ impl Neuron {
                 row.iter()
                     .enumerate()
                     .map(|(j, xij)| {
-                        xij.clone().with_name(&format!("x{i} s{j}"))
+                        xij.clone().with_name(&format!("x[{i}][{j}]"))
                     })
                     .collect()
             })

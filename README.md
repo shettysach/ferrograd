@@ -82,29 +82,31 @@ cargo run --example neuron
 ```
 
 ```
+ReLU(2)
+
 Forward pass:
-R data = 0.326, grad = 0.000
-└── + data = 0.326, grad = 0.000
-    ├── + data = 0.326, grad = 0.000
-    │   ├── * data = 0.422, grad = 0.000
-    │   │   ├── data = -0.211, grad = 0.000 ← weight 0
-    │   │   └── data = -2.000, grad = 0.000 ← input 0
-    │   └── * data = -0.096, grad = 0.000
-    │       ├── data = -0.096, grad = 0.000 ← weight 1
-    │       └── data = 1.000, grad = 0.000 ← input 1
+ReLU data = 0.000, grad = 0.000 
+└── + data = -1.159, grad = 0.000 
+    ├── + data = -1.159, grad = 0.000 
+    │   ├── * data = -0.543, grad = 0.000 
+    │   │   ├── data = 0.272, grad = 0.000 ← weight[0]
+    │   │   └── data = -2.000, grad = 0.000 ← x[0][0]
+    │   └── * data = -0.615, grad = 0.000 
+    │       ├── data = -0.615, grad = 0.000 ← weight[1]
+    │       └── data = 1.000, grad = 0.000 ← x[1][0]
     └── data = 0.000, grad = 0.000 ← bias
 
 Backward pass:
-R data = 0.326, grad = 1.000
-└── + data = 0.326, grad = 1.000
-    ├── + data = 0.326, grad = 1.000
-    │   ├── * data = 0.422, grad = 1.000
-    │   │   ├── data = -0.211, grad = -2.000 ← weight 0
-    │   │   └── data = -2.000, grad = -0.211 ← input 0
-    │   └── * data = -0.096, grad = 1.000
-    │       ├── data = -0.096, grad = 1.000 ← weight 1
-    │       └── data = 1.000, grad = -0.096 ← input 1
-    └── data = 0.000, grad = 1.000 ← bias
+ReLU data = 0.000, grad = 1.000 
+└── + data = -1.159, grad = 0.000 
+    ├── + data = -1.159, grad = 0.000 
+    │   ├── * data = -0.543, grad = 0.000 
+    │   │   ├── data = 0.272, grad = 0.000 ← weight[0]
+    │   │   └── data = -2.000, grad = 0.000 ← x[0][0]
+    │   └── * data = -0.615, grad = 0.000 
+    │       ├── data = -0.615, grad = 0.000 ← weight[1]
+    │       └── data = 1.000, grad = 0.000 ← x[1][0]
+    └── data = 0.000, grad = 0.000 ← bias
 ```
 
 ---
@@ -114,29 +116,27 @@ R data = 0.326, grad = 1.000
 ```rust
 use micrograd::{
     engine::{Activation, Value},
+    loss::HingeLoss,
     metrics::BinaryAccuracy,
     nn::{
-        loss::HingeEmbeddingLoss,
-        optim::{adam::Adam, l2_regularization},
+        optim::{l2_regularization, Adam},
         MultiLayerPerceptron,
     },
 };
 
 fn main() {
+    let (xs, ys) = load_data();
     let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::ReLU);
 
     println!("Model - \n{}", model);
     println!("Number of parameters = {}\n", model.parameters().len());
 
-    let (xs, ys) = load_moons_data();
     let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 0.00000001);
-    let loss = HingeEmbeddingLoss::new(1.0);
+    let loss = HingeLoss::new(1.0);
     let accuracy = BinaryAccuracy::new(0.0);
 
     (0..100).for_each(|k| {
-        let ypred: Vec<Vec<Value>> =
-            xs.iter().map(|xrow| model.forward(&xrow)).collect();
-
+        let ypred: Vec<Vec<Value>> = model.forward(&xs);
         let data_loss = loss.loss(&ypred, &ys);
         let reg_loss = l2_regularization(0.0001, model.parameters());
         let total_loss = data_loss + reg_loss;
@@ -197,6 +197,8 @@ ASCII contour graph -
 □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■
 □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■
 ```
+
+---
 
 ###### Credits
 
