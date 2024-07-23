@@ -4,6 +4,9 @@
 - See `/notes/Gradients.md` for explanation of gradients and backward functions, and `/notes/Optimizers.md` for the equations and step functions of optimizers.
 - The library lets you create neurons, dense layers and multilayer perceptrons, for non-linear classification tasks.
 
+> _NOTE: WIP_
+> _TODO: Multiclass classification support, binary and multiclass cross-entropy loss, AdaGrad and RMSProp_
+
 #### Examples
 
 ##### Readme example from karpathy/micrograd

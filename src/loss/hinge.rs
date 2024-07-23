@@ -1,29 +1,28 @@
 use crate::engine::Value;
 
-pub struct HingeLoss {
-    margin: f64,
-}
+pub struct HingeLoss;
 
 impl HingeLoss {
-    pub fn new(margin: f64) -> HingeLoss {
-        HingeLoss { margin }
+    pub fn new() -> HingeLoss {
+        HingeLoss
     }
 
-    pub fn loss(&self, ypred: &Vec<Vec<Value>>, ys: &Vec<Vec<Value>>) -> Value {
+    pub fn loss(
+        &self,
+        ypred: &Vec<Vec<Value>>,
+        ytrue: &Vec<Vec<Value>>,
+    ) -> Value {
         ypred
             .iter()
-            .zip(ys)
-            .map(|(ypred_i, ys_i)| {
+            .zip(ytrue)
+            .map(|(ypred_i, ytrue_i)| {
                 ypred_i
                     .iter()
-                    .zip(ys_i)
-                    .map(|(ypred_j, ys_j)| {
-                        (self.margin - ys_j * ypred_j).relu()
-                    })
+                    .zip(ytrue_i)
+                    .map(|(ypred_j, ytrue)| (1.0 - ytrue * ypred_j).relu())
                     .sum::<Value>()
-                    / ypred_i.len() as f64
             })
             .sum::<Value>()
-            / ypred.len() as f64
+            / (ypred.len() * ypred[0].len()) as f64
     }
 }

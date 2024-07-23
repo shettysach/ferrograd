@@ -43,33 +43,6 @@ fn main() {
     print_grid(&model, 15);
 }
 
-// -- Grid --
-
-fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
-    println!("\nASCII contour graph - \n■ > 0.0  \n□ <= 0.0 ");
-    let grid: Vec<Vec<&str>> = (-bound..bound)
-        .map(|y| {
-            (-bound..bound)
-                .map(|x| {
-                    let k = &model.forward(&vec![
-                        vec![Value::new(x as f64 / bound as f64 * 2.0)],
-                        vec![Value::new(-y as f64 / bound as f64 * 2.0)],
-                    ])[0][0];
-
-                    if k.borrow().data > 0.0 {
-                        "■"
-                    } else {
-                        "□"
-                    }
-                })
-                .collect()
-        })
-        .collect();
-
-    println!();
-    grid.iter().for_each(|row| println!("{}", row.join(" ")));
-}
-
 // --- Dataloader ---
 
 use std::fs::File;
@@ -103,4 +76,31 @@ fn load_data(
     let ys = vec![y0s];
 
     (xs, ys)
+}
+
+// -- Grid --
+
+fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
+    println!("\nASCII contour graph - \n■ > 0.0  \n□ <= 0.0 ");
+    let grid: Vec<Vec<&str>> = (-bound..bound)
+        .map(|y| {
+            (-bound..bound)
+                .map(|x| {
+                    let k = &model.forward(&vec![
+                        vec![Value::new(x as f64 / bound as f64 * 2.0)],
+                        vec![Value::new(-y as f64 / bound as f64 * 2.0)],
+                    ])[0][0];
+
+                    if k.borrow().data > 0.0 {
+                        "■"
+                    } else {
+                        "□"
+                    }
+                })
+                .collect()
+        })
+        .collect();
+
+    println!();
+    grid.iter().for_each(|row| println!("{}", row.join(" ")));
 }

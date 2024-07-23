@@ -14,17 +14,20 @@ impl BinaryAccuracy {
         ypred: &Vec<Vec<Value>>,
         ys: &Vec<Vec<Value>>,
     ) -> f64 {
-        let ypred = ypred.get(0).expect("Empty predictions");
-        let ys = ys.get(0).expect("Empty targets");
-
         ypred
             .iter()
             .zip(ys)
-            .filter(|&(ypred_i, ys_i)| {
-                (ys_i.borrow().data > self.threshold)
-                    == (ypred_i.borrow().data > self.threshold)
+            .map(|(ypred_i, ys_i)| {
+                ypred_i
+                    .iter()
+                    .zip(ys_i.iter())
+                    .filter(|&(ypred_j, ys_j)| {
+                        (ys_j.borrow().data > self.threshold)
+                            == (ypred_j.borrow().data > self.threshold)
+                    })
+                    .count()
             })
-            .count() as f64
-            / ypred.len() as f64
+            .sum::<usize>() as f64
+            / (ypred.len() * ypred[0].len()) as f64
     }
 }
