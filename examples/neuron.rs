@@ -1,4 +1,4 @@
-use micrograd::{
+use ferrograd::{
     engine::{Activation, Value},
     nn::Neuron,
 };

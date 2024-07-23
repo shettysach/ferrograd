@@ -4,4 +4,4 @@ mod comp_ops;
 mod prim_ops;
 mod value;
 
-pub use value::*;
+pub use value::{Activation, Operation, Value};

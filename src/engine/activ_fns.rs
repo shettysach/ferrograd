@@ -1,4 +1,4 @@
-use super::{Activation, Operation, Value, V};
+use crate::engine::value::{Activation, Operation, Value, V};
 
 impl Value {
     pub fn relu(&self) -> Value {

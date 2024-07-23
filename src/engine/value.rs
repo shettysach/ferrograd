@@ -64,13 +64,25 @@ impl PartialEq for Value {
 
 impl Eq for Value {}
 
+impl fmt::Debug for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Value")
+            .field("data", &self.borrow().data)
+            .field("grad", &self.borrow().grad)
+            .field("name", &self.borrow()._var_name)
+            .field("op", &self.borrow()._op)
+            .field("prev", &self.borrow()._prev)
+            .finish()
+    }
+}
+
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let v = &self.borrow();
 
         let fmt_name = |var_name: &str| -> String {
             if var_name.is_empty() {
-                "".to_string()
+                String::new()
             } else {
                 format!("← {}", var_name)
             }
@@ -104,6 +116,7 @@ impl fmt::Display for Value {
 }
 
 /// Scalar operations and activation functions.
+#[derive(Debug)]
 pub enum Operation {
     Add,
     Mul,
@@ -114,7 +127,7 @@ pub enum Operation {
 }
 
 /// Activation functions.
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum Activation {
     ReLU,
     LeakyReLU,

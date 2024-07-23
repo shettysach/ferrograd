@@ -1,15 +1,14 @@
 use crate::engine::Value;
 
-pub struct HingeLoss {
-    margin: f64,
-}
+pub struct BinaryCrossEntropyLoss {}
 
-impl HingeLoss {
-    pub fn new(margin: f64) -> HingeLoss {
-        HingeLoss { margin }
+impl BinaryCrossEntropyLoss {
+    pub fn new() -> BinaryCrossEntropyLoss {
+        BinaryCrossEntropyLoss {}
     }
 
     pub fn loss(&self, ypred: &Vec<Vec<Value>>, ys: &Vec<Vec<Value>>) -> Value {
+        let epsilon = 1e-7;
         ypred
             .iter()
             .zip(ys)
@@ -18,7 +17,11 @@ impl HingeLoss {
                     .iter()
                     .zip(ys_i)
                     .map(|(ypred_j, ys_j)| {
-                        (self.margin - ys_j * ypred_j).relu()
+                        let data_clamped =
+                            ypred_j.borrow().data.clamp(epsilon, 1.0 - epsilon);
+                        let yp = Value::new(data_clamped).sigmoid().ln();
+
+                        -((ys_j * &yp) + (1.0 - ys_j) * (1.0 - &yp))
                     })
                     .sum::<Value>()
                     / ypred_i.len() as f64

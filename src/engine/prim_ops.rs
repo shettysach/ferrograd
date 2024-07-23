@@ -1,4 +1,4 @@
-use super::{Operation, Value, V};
+use crate::engine::value::{Operation, Value, V};
 use std::ops;
 
 // Addition
@@ -105,8 +105,8 @@ impl Value {
         Value::init(
             self.borrow().data.ln(),
             Some(|value: &V| {
-                value._prev[0].borrow_mut().grad +=
-                    value.grad / value._prev[0].borrow().data;
+                let mut prev = value._prev[0].borrow_mut();
+                prev.grad += value.grad / prev.data;
             }),
             vec![self.clone()],
             Some(Operation::Ln),

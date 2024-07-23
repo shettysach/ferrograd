@@ -1,27 +1,28 @@
 use ferrograd::{
     engine::{Activation, Value},
-    loss::HingeLoss,
+    loss::MeanSquareErrorLoss,
     metrics::BinaryAccuracy,
     nn::{
-        optim::{l2_regularization, SGD},
+        optim::{l2_regularization, Adam},
         MultiLayerPerceptron,
     },
 };
 
 fn main() {
-    let (xs, ys) = load_data("data/moons_data.csv", 1);
+    let (xs, ys) = load_data("data/circles_data.csv", 1);
 
-    let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::ReLU);
+    let model = MultiLayerPerceptron::new(2, vec![24, 24, 1], Activation::ReLU);
     println!("Model - \n{}", model);
     println!("Number of parameters = {}\n", model.parameters().len());
 
-    let mut optim = SGD::new(model.parameters(), 0.1, 0.9);
-    let loss = HingeLoss::new(1.0);
-    let accuracy = BinaryAccuracy::new(0.0);
+    let mut optim = Adam::new(model.parameters(), 0.01, 0.9, 0.999, 1e-7);
+    let loss = MeanSquareErrorLoss::new();
+    let accuracy = BinaryAccuracy::new(0.5);
 
     (0..100).for_each(|k| {
         let ypred: Vec<Vec<Value>> = model.forward(&xs);
-        let data_loss = loss.loss(&ypred, &ys);
+
+        let data_loss = loss.loss(&ypred, &ys).pow(0.5); // RMSE
         let reg_loss = l2_regularization(0.0001, model.parameters());
         let total_loss = data_loss + reg_loss;
 

@@ -1,12 +1,11 @@
-use micrograd::engine::Value;
+use ferrograd::engine::Value;
 
 fn main() {
     let a = Value::new(-4.).with_name("a");
     let b = Value::new(2.).with_name("b");
 
     let mut c = (&a + &b).with_name("c");
-
-    let mut d = (&a * &b + &b.pow(3.)).with_name("c");
+    let mut d = (&a * &b + &b.pow(3.)).with_name("d");
 
     c += &c + 1.;
     c += 1. + &c + (-&a);
@@ -14,7 +13,6 @@ fn main() {
     d += 3. * &d + (&b - &a).relu();
 
     let e = (&c - &d).with_name("e");
-
     let f = e.pow(2.).with_name("f");
 
     let mut g = (&f / 2.).with_name("g");

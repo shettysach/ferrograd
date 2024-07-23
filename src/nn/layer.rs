@@ -32,7 +32,7 @@ impl fmt::Display for Layer {
             Some(neuron) => {
                 write!(f, "{} * {}", self.neurons.len(), neuron)
             }
-            None => write!(f, "EMPTY"),
+            None => write!(f, "Empty"),
         }
     }
 }

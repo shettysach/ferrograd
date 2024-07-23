@@ -3,6 +3,7 @@ use rand::{distributions::Uniform, Rng};
 use std::fmt;
 
 /// Neuron with weights and a bias.
+#[derive(Debug)]
 pub struct Neuron {
     pub w: Vec<Value>,              // Weights
     pub b: Value,                   // Bias
@@ -59,7 +60,7 @@ impl fmt::Display for Neuron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.nonlin {
             Some(val) => write!(f, "{}({})", Operation::AF(val), self.w.len()),
-            None => write!(f, "({})", self.w.len()),
+            None => write!(f, "{}", self.w.len()),
         }
     }
 }
