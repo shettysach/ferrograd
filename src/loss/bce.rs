@@ -1,11 +1,11 @@
 use crate::engine::Value;
 
-// Use for binary classification when target values are -1 an 1.
-pub struct HingeLoss;
+// Use for binary classification when target values are 0 an 1.
+pub struct BinaryCrossEntropyLoss;
 
-impl HingeLoss {
-    pub fn new() -> HingeLoss {
-        HingeLoss
+impl BinaryCrossEntropyLoss {
+    pub fn new() -> BinaryCrossEntropyLoss {
+        BinaryCrossEntropyLoss
     }
 
     pub fn loss(
@@ -20,7 +20,12 @@ impl HingeLoss {
                 ypred_i
                     .iter()
                     .zip(ytrue_i)
-                    .map(|(ypred_j, ytrue)| (1.0 - ytrue * ypred_j).relu())
+                    .map(|(ypred_j, ytrue_j)| {
+                        let yp_sigmoid = ypred_j.sigmoid();
+
+                        -((ytrue_j * yp_sigmoid.ln())
+                            + (1.0 - ytrue_j) * (1.0 - yp_sigmoid).ln())
+                    })
                     .sum::<Value>()
             })
             .sum::<Value>()

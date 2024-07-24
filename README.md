@@ -2,10 +2,9 @@
 
 - A small autograd engine, inspired from [karpathy/micrograd](https://github.com/karpathy/micrograd), with a few more features, such as additional activation functions, loss criterions, optimizers and accuracy metrics.
 - See `/notes/Gradients.md` for explanation of gradients and backward functions, and `/notes/Optimizers.md` for the equations and step functions of optimizers.
-- The library lets you create neurons, dense layers and multilayer perceptrons, for non-linear classification tasks.
+- Capable of creating neurons, dense layers and multilayer perceptrons, for non-linear classification tasks.
 
-> _NOTE: WIP_
-> _TODO: Multiclass classification support, binary and multiclass cross-entropy loss, AdaGrad and RMSProp_
+> NOTE: WIP
 
 #### Examples
 
@@ -45,7 +44,7 @@ fn main() {
 cargo run --example readme
 ```
 
-```zsh
+```
 # Printing of g.tree()
 
 g.data = 24.7041
@@ -86,32 +85,32 @@ fn main() {
 cargo run --example neuron
 ```
 
-```zsh
+```
 ReLU(2)
 
 Forward pass:
-ReLU data = 0.000, grad = 0.000
-└── + data = -1.159, grad = 0.000
-    ├── + data = -1.159, grad = 0.000
-    │   ├── * data = -0.543, grad = 0.000
-    │   │   ├── data = 0.272, grad = 0.000 ← weight[0]
-    │   │   └── data = -2.000, grad = 0.000 ← x[0][0]
-    │   └── * data = -0.615, grad = 0.000
-    │       ├── data = -0.615, grad = 0.000 ← weight[1]
+ReLU data = 1.800, grad = 0.000 
+└── + data = 1.800, grad = 0.000 
+    ├── + data = 1.800, grad = 0.000 
+    │   ├── * data = 1.911, grad = 0.000 
+    │   │   ├── data = 0.955, grad = 0.000 ← weight[0]
+    │   │   └── data = 2.000, grad = 0.000 ← x[0][0]
+    │   └── * data = -0.111, grad = 0.000 
+    │       ├── data = -0.111, grad = 0.000 ← weight[1]
     │       └── data = 1.000, grad = 0.000 ← x[1][0]
     └── data = 0.000, grad = 0.000 ← bias
 
 Backward pass:
-ReLU data = 0.000, grad = 1.000
-└── + data = -1.159, grad = 0.000
-    ├── + data = -1.159, grad = 0.000
-    │   ├── * data = -0.543, grad = 0.000
-    │   │   ├── data = 0.272, grad = 0.000 ← weight[0]
-    │   │   └── data = -2.000, grad = 0.000 ← x[0][0]
-    │   └── * data = -0.615, grad = 0.000
-    │       ├── data = -0.615, grad = 0.000 ← weight[1]
-    │       └── data = 1.000, grad = 0.000 ← x[1][0]
-    └── data = 0.000, grad = 0.000 ← bias
+ReLU data = 1.800, grad = 1.000 
+└── + data = 1.800, grad = 1.000 
+    ├── + data = 1.800, grad = 1.000 
+    │   ├── * data = 1.911, grad = 1.000 
+    │   │   ├── data = 0.955, grad = 2.000 ← weight[0]
+    │   │   └── data = 2.000, grad = 0.955 ← x[0][0]
+    │   └── * data = -0.111, grad = 1.000 
+    │       ├── data = -0.111, grad = 1.000 ← weight[1]
+    │       └── data = 1.000, grad = -0.111 ← x[1][0]
+    └── data = 0.000, grad = 1.000 ← bias
 ```
 
 ---
@@ -127,21 +126,23 @@ use ferrograd::{
         optim::{l2_regularization, SGD},
         MultiLayerPerceptron,
     },
+    utils::read_csv,
 };
 
 fn main() {
-    let (xs, ys) = load_data("data/moons_data.csv", 1);
+    let (xs, ys) = read_csv("data/moons_data.csv", 2, 1, 1);
 
     let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::ReLU);
     println!("Model - \n{}", model);
     println!("Number of parameters = {}\n", model.parameters().len());
 
     let mut optim = SGD::new(model.parameters(), 0.1, 0.9);
-    let loss = HingeLoss::new(1.0);
+    let loss = HingeLoss::new();
     let accuracy = BinaryAccuracy::new(0.0);
 
     (0..100).for_each(|k| {
         let ypred: Vec<Vec<Value>> = model.forward(&xs);
+
         let data_loss = loss.loss(&ypred, &ys);
         let reg_loss = l2_regularization(0.0001, model.parameters());
         let total_loss = data_loss + reg_loss;
@@ -163,14 +164,14 @@ fn main() {
     print_grid(&model, 15);
 }
 
-// Data loading and grid printing functions
+// fn print_grid(model: &MultiLayerPerceptron, bound: i32) { ... }
 ```
 
 ```console
 cargo run --example moons
 ```
 
-```zsh
+```
 # ...
 step 97 - loss 0.012, accuracy 100.00%
 step 98 - loss 0.012, accuracy 100.00%
@@ -213,6 +214,113 @@ ASCII contour graph -
 ```
 
 ---
+
+##### scikit-learn's make_circles dataset classification
+
+```rust
+use ferrograd::{
+    engine::{Activation, Value},
+    loss::BinaryCrossEntropyLoss,
+    metrics::BinaryAccuracy,
+    nn::{
+        optim::{l2_regularization, Adam},
+        MultiLayerPerceptron,
+    },
+    utils::read_csv,
+};
+
+fn main() {
+    let (xs, ys) = read_csv("data/circles_data.csv", 2, 1, 1);
+
+    let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::ReLU);
+    println!("Model - \n{}", model);
+    println!("Number of parameters = {}\n", model.parameters().len());
+
+    let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 1e-7);
+    let loss = BinaryCrossEntropyLoss::new();
+    let accuracy = BinaryAccuracy::new(0.5);
+
+    (0..100).for_each(|k| {
+        let ypred: Vec<Vec<Value>> = model.forward(&xs);
+
+        let data_loss = loss.loss(&ypred, &ys);
+        let reg_loss = l2_regularization(0.0001, model.parameters());
+        let total_loss = data_loss + reg_loss;
+
+        optim.zero_grad();
+        total_loss.backward();
+        optim.step();
+
+        let acc = accuracy.compute(&ypred, &ys);
+
+        println!(
+            "step {} - loss {:.3}, accuracy {:.2}%",
+            k,
+            total_loss.borrow().data,
+            acc * 100.0
+        );
+    });
+
+    print_grid(&model, 15);
+}
+
+// fn print_grid(model: &MultiLayerPerceptron, bound: i32) { ... }
+```
+
+```console
+cargo run --example circles
+```
+
+```
+# ...
+step 97 - loss 0.022, accuracy 100.00%
+step 98 - loss 0.022, accuracy 100.00%
+step 99 - loss 0.021, accuracy 100.00%
+
+ASCII contour graph - 
+■ > 0.5  
+□ <= 0.5 
+
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+```
+
+---
+
+> TODO: 
+> - Multiclass classification support
+> - Multiclass and Multilabel cross-entropy loss
+> - AdaGrad, RMSProp and AdamW
+> - Documentation and notes
+
 
 ###### Credits
 

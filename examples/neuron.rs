@@ -7,8 +7,8 @@ fn main() {
     let n = Neuron::new(2, Some(Activation::ReLU)).name_params();
 
     let x = vec![
-        vec![Value::new(-2.0)], // x0
-        vec![Value::new(1.0)],  // x1
+        vec![Value::new(2.0)], // x0
+        vec![Value::new(1.0)], // x1
     ];
     let x = n.name_inputs(x);
 

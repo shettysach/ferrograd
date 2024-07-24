@@ -1,3 +1,3 @@
-mod binary_accuracy;
+mod binary_acc;
 
-pub use binary_accuracy::*;
+pub use binary_acc::*;

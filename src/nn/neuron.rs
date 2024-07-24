@@ -48,10 +48,10 @@ impl Neuron {
             .collect()
     }
 
-    /// Returns vector of bias and weights.
+    /// Returns vector of weights and bias
     pub fn parameters(&self) -> Vec<Value> {
         let mut p = self.w.clone();
-        p.insert(0, self.b.clone());
+        p.push(self.b.clone());
         p
     }
 }
@@ -68,7 +68,7 @@ impl fmt::Display for Neuron {
 // -- Extras --
 
 impl Neuron {
-    /// Assign var_names for parameters as `weight[i]` and `bias`.
+    /// Assign `var_names` for parameters as `weight[i]` and `bias`.
     pub fn name_params(self) -> Neuron {
         let w = self
             .w
@@ -81,9 +81,11 @@ impl Neuron {
         Neuron { w, b, nonlin }
     }
 
-    /// Assign var_names for inputs as `x[i][j]`,
-    /// where `i` stands for the ith feature
-    /// and `j` stands for the jth sample of that feature.
+    /**
+    Assign `var_names` for inputs as `x[i][j]`,
+    - `i` stands for the ith feature
+    - `j` stands for the jth sample.
+    */
     pub fn name_inputs(&self, x: Vec<Vec<Value>>) -> Vec<Vec<Value>> {
         x.iter()
             .enumerate()
