@@ -23,17 +23,34 @@ impl Neuron {
         }
     }
 
+    /// Forward pass of single input x through the Neuron.
+    pub fn forw(&self, x: &Vec<Value>) -> Value {
+        let act = self
+            .w
+            .iter()
+            .zip(x)
+            .map(|(w_i, x_i)| w_i * x_i)
+            .sum::<Value>()
+            + &self.b;
+
+        match self.nonlin {
+            Some(Activation::ReLU) => act.relu(),
+            Some(Activation::LeakyReLU) => act.leaky_relu(),
+            Some(Activation::Tanh) => act.tanh(),
+            Some(Activation::Sigmoid) => act.sigmoid(),
+            None => act,
+        }
+    }
+
     /// Forward pass of input x through the Neuron.
     pub fn forward(&self, x: &Vec<Vec<Value>>) -> Vec<Value> {
-        let len = x.iter().next().expect("Empty input").len();
-
-        (0..len)
-            .map(|i| {
+        x.iter()
+            .map(|x_i| {
                 let act = self
                     .w
                     .iter()
-                    .zip(x.iter().map(|row| &row[i]))
-                    .map(|(wi, xi)| wi * xi)
+                    .zip(x_i)
+                    .map(|(w_i, x_ij)| w_i * x_ij)
                     .sum::<Value>()
                     + &self.b;
 
@@ -59,7 +76,9 @@ impl Neuron {
 impl fmt::Display for Neuron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.nonlin {
-            Some(val) => write!(f, "{}({})", Operation::AF(val), self.w.len()),
+            Some(val) => {
+                write!(f, "{}({})", Operation::AF(val), self.w.len())
+            }
             None => write!(f, "{}", self.w.len()),
         }
     }

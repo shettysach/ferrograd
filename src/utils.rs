@@ -18,25 +18,26 @@ pub fn read_csv(
     let file = File::open(filepath).unwrap();
     let reader = BufReader::new(file);
 
-    let mut xs = vec![Vec::new(); xnum];
-    let mut ys = vec![Vec::new(); ynum];
+    let (xs, ys) = reader
+        .lines()
+        .skip(skip_rows)
+        .map(|line| {
+            let line = line.unwrap();
+            let fields: Vec<&str> = line.split(',').collect();
 
-    reader.lines().skip(skip_rows).for_each(|line| {
-        let line = line.unwrap();
-        let fields: Vec<&str> = line.split(',').collect();
+            assert!(fields.len() >= xnum + ynum, "Not enough fields in line");
 
-        assert!(fields.len() >= xnum + ynum, "Not enough fields in line");
+            let x_vec = (0..xnum)
+                .map(|i| Value::new(fields[i].parse::<f64>().unwrap()))
+                .collect();
 
-        (0..xnum).for_each(|i| {
-            let x_val = fields[i].parse::<f64>().unwrap();
-            xs[i].push(Value::new(x_val));
-        });
+            let y_vec = (0..ynum)
+                .map(|i| Value::new(fields[xnum + i].parse::<f64>().unwrap()))
+                .collect();
 
-        (0..ynum).for_each(|i| {
-            let y_val = fields[xnum + i].parse::<f64>().unwrap();
-            ys[i].push(Value::new(y_val));
-        });
-    });
+            (x_vec, y_vec)
+        })
+        .collect();
 
     (xs, ys)
 }

@@ -1,4 +1,5 @@
 use crate::engine::Value;
+use std::fmt;
 
 /// Adam optimizer.
 pub struct Adam {
@@ -62,5 +63,16 @@ impl Adam {
         for p in &self.params {
             p.borrow_mut().grad = 0.0;
         }
+    }
+}
+
+impl fmt::Debug for Adam {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Adam")
+            .field("lr", &self.lr)
+            .field("beta1", &self.beta1)
+            .field("beta2", &self.beta2)
+            .field("epsilon", &self.epsilon)
+            .finish()
     }
 }

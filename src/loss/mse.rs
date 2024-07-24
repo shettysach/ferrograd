@@ -1,5 +1,6 @@
 use crate::engine::Value;
 
+#[derive(Debug)]
 pub struct MeanSquareErrorLoss {}
 
 impl MeanSquareErrorLoss {

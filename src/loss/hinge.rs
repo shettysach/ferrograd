@@ -1,6 +1,7 @@
 use crate::engine::Value;
 
 // Use for binary classification when target values are -1 an 1.
+#[derive(Debug)]
 pub struct HingeLoss;
 
 impl HingeLoss {
@@ -15,7 +16,7 @@ impl HingeLoss {
     ) -> Value {
         ypred
             .iter()
-            .zip(ytrue)
+            .zip(ytrue.iter())
             .map(|(ypred_i, ytrue_i)| {
                 ypred_i
                     .iter()

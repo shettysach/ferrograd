@@ -1,4 +1,5 @@
 use crate::engine::Value;
+use std::fmt;
 
 /// Stochastic Gradient Descent optimizer with momentum.
 pub struct SGD {
@@ -37,5 +38,14 @@ impl SGD {
         for p in &self.params {
             p.borrow_mut().grad = 0.0;
         }
+    }
+}
+
+impl fmt::Debug for SGD {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SGD")
+            .field("lr", &self.lr)
+            .field("momentum", &self.momentum)
+            .finish()
     }
 }

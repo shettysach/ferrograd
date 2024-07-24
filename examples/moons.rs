@@ -20,6 +20,11 @@ fn main() {
     let loss = HingeLoss::new();
     let accuracy = BinaryAccuracy::new(0.0);
 
+    println!(
+        "Optimiser: {:#?}\n\nCriterion: {:#?}\n\nMetric: {:#?}\n",
+        optim, loss, accuracy
+    );
+
     (0..100).for_each(|k| {
         let ypred: Vec<Vec<Value>> = model.forward(&xs);
 
@@ -52,10 +57,10 @@ fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
         .map(|y| {
             (-bound..bound)
                 .map(|x| {
-                    let k = &model.forward(&vec![
-                        vec![Value::new(x as f64 / bound as f64 * 2.0)],
-                        vec![Value::new(-y as f64 / bound as f64 * 2.0)],
-                    ])[0][0];
+                    let k = &model.forward(&vec![vec![
+                        Value::new(x as f64 / bound as f64 * 2.0),
+                        Value::new(-y as f64 / bound as f64 * 2.0),
+                    ]])[0][0];
 
                     if k.borrow().data > 0.0 {
                         "■"
