@@ -1,4 +1,4 @@
-use std::{cell::RefCell, fmt, hash::Hash, ops, rc::Rc};
+use std::{cell::RefCell, ops, rc::Rc};
 use uuid::Uuid;
 
 /// Scalar with data and gradient.
@@ -7,8 +7,8 @@ pub struct Value(Rc<RefCell<V>>); // Smart pointer to V
 
 // Struct that holds the data
 pub struct V {
-    pub data: f64,
-    pub grad: f64,
+    pub data: f32,
+    pub grad: f32,
     pub _backward: Option<fn(value: &V)>, // Function pointer to the backward function
     pub _prev: Vec<Value>,                // Children (Operands)
     pub _op: Option<Operation>,           // None if initialisation or constant
@@ -27,7 +27,7 @@ impl ops::Deref for Value {
 
 impl Value {
     pub fn init(
-        data: f64,
+        data: f32,
         backward: Option<fn(value: &V)>,
         prev: Vec<Value>,
         op: Option<Operation>,
@@ -45,73 +45,8 @@ impl Value {
     }
 
     /// Initialise new Value.
-    pub fn new(data: f64) -> Value {
+    pub fn new(data: f32) -> Value {
         Value::init(data, None, Vec::new(), None, Some(String::new()))
-    }
-}
-
-impl Hash for Value {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.borrow()._uuid.hash(state);
-    }
-}
-
-impl PartialEq for Value {
-    fn eq(&self, other: &Value) -> bool {
-        self.borrow()._uuid == other.borrow()._uuid
-    }
-}
-
-impl Eq for Value {}
-
-impl fmt::Debug for Value {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Value")
-            .field("data", &self.borrow().data)
-            .field("grad", &self.borrow().grad)
-            .field("name", &self.borrow()._var_name)
-            .field("op", &self.borrow()._op)
-            .field("prev", &self.borrow()._prev)
-            .finish()
-    }
-}
-
-impl fmt::Display for Value {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let v = &self.borrow();
-
-        let fmt_name = |var_name: &str| -> String {
-            if var_name.is_empty() {
-                String::new()
-            } else {
-                format!("← {}", var_name)
-            }
-        };
-
-        match (&v._var_name, &v._op) {
-            (Some(var_name), Some(op)) => {
-                write!(
-                    f,
-                    "{} data = {:.3}, grad = {:.3} {}",
-                    op,
-                    v.data,
-                    v.grad,
-                    fmt_name(var_name)
-                )
-            }
-            (Some(var_name), None) => {
-                write!(
-                    f,
-                    "data = {:.3}, grad = {:.3} {}",
-                    v.data,
-                    v.grad,
-                    fmt_name(var_name)
-                )
-            }
-            (None, _) => {
-                write!(f, "{:.3}", v.data)
-            }
-        }
     }
 }
 
@@ -133,23 +68,6 @@ pub enum Activation {
     LeakyReLU,
     Tanh,
     Sigmoid,
-}
-
-impl fmt::Display for Operation {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let symbol = match self {
-            Operation::Add => "+",
-            Operation::Mul => "*",
-            Operation::Pow => "^",
-            Operation::Ln => "ln",
-            Operation::Exp => "exp",
-            Operation::AF(Activation::ReLU) => "ReLU",
-            Operation::AF(Activation::LeakyReLU) => "LeakyReLU",
-            Operation::AF(Activation::Tanh) => "tanh",
-            Operation::AF(Activation::Sigmoid) => "σ",
-        };
-        write!(f, "{}", symbol)
-    }
 }
 
 // --- Extras ---

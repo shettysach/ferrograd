@@ -11,8 +11,8 @@ Reads a CSV file __containing only numeric fields__ and returns a tuple (`xs`, `
 */
 pub fn read_csv(
     filepath: &str,
-    xnum: usize,
-    ynum: usize,
+    x_inds: &[usize],
+    y_inds: &[usize],
     skip_rows: usize,
 ) -> (Vec<Vec<Value>>, Vec<Vec<Value>>) {
     let file = File::open(filepath).unwrap();
@@ -25,14 +25,19 @@ pub fn read_csv(
             let line = line.unwrap();
             let fields: Vec<&str> = line.split(',').collect();
 
-            assert!(fields.len() >= xnum + ynum, "Not enough fields in line");
+            assert!(
+                fields.len() >= x_inds.len() + y_inds.len(),
+                "Not enough fields in the line"
+            );
 
-            let x_vec = (0..xnum)
-                .map(|i| Value::new(fields[i].parse::<f64>().unwrap()))
+            let x_vec = x_inds
+                .iter()
+                .map(|i| Value::new(fields[*i].parse::<f32>().unwrap()))
                 .collect();
 
-            let y_vec = (0..ynum)
-                .map(|i| Value::new(fields[xnum + i].parse::<f64>().unwrap()))
+            let y_vec = y_inds
+                .iter()
+                .map(|i| Value::new(fields[*i].parse::<f32>().unwrap()))
                 .collect();
 
             (x_vec, y_vec)

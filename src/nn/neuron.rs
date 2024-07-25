@@ -3,7 +3,6 @@ use rand::{distributions::Uniform, Rng};
 use std::fmt;
 
 /// Neuron with weights and a bias.
-#[derive(Debug)]
 pub struct Neuron {
     pub w: Vec<Value>,              // Weights
     pub b: Value,                   // Bias
@@ -14,7 +13,7 @@ impl Neuron {
     /// Initialise new Neuron with uniformly distributed random weights and zero bias.
     pub fn new(nin: u32, nonlin: Option<Activation>) -> Neuron {
         let mut rng = rand::thread_rng();
-        let range = Uniform::<f64>::new(-1., 1.);
+        let range = Uniform::<f32>::new(-1., 1.);
 
         Neuron {
             w: (0..nin).map(|_| Value::new(rng.sample(range))).collect(),
@@ -44,25 +43,7 @@ impl Neuron {
 
     /// Forward pass of input x through the Neuron.
     pub fn forward(&self, x: &Vec<Vec<Value>>) -> Vec<Value> {
-        x.iter()
-            .map(|x_i| {
-                let act = self
-                    .w
-                    .iter()
-                    .zip(x_i)
-                    .map(|(w_i, x_ij)| w_i * x_ij)
-                    .sum::<Value>()
-                    + &self.b;
-
-                match self.nonlin {
-                    Some(Activation::ReLU) => act.relu(),
-                    Some(Activation::LeakyReLU) => act.leaky_relu(),
-                    Some(Activation::Tanh) => act.tanh(),
-                    Some(Activation::Sigmoid) => act.sigmoid(),
-                    None => act,
-                }
-            })
-            .collect()
+        x.iter().map(|x_i| self.forw(x_i)).collect()
     }
 
     /// Returns vector of weights and bias
@@ -79,8 +60,19 @@ impl fmt::Display for Neuron {
             Some(val) => {
                 write!(f, "{}({})", Operation::AF(val), self.w.len())
             }
-            None => write!(f, "{}", self.w.len()),
+            None => write!(f, "linear({})", self.w.len()),
         }
+    }
+}
+
+impl fmt::Debug for Neuron {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut debug_struct = f.debug_struct("Neuron");
+        debug_struct.field("input", &self.w.len());
+        if let Some(val) = self.nonlin {
+            debug_struct.field("actv_fn", &Operation::AF(val));
+        }
+        debug_struct.finish()
     }
 }
 
@@ -112,7 +104,7 @@ impl Neuron {
                 row.iter()
                     .enumerate()
                     .map(|(j, xij)| {
-                        xij.clone().with_name(&format!("x[{i}][{j}]"))
+                        xij.clone().with_name(&format!("X[{i}][{j}]"))
                     })
                     .collect()
             })

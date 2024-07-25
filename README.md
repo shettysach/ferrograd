@@ -316,9 +316,8 @@ ASCII contour graph -
 ---
 
 > TODO: 
-> - Multiclass classification support
-> - Multiclass and Multilabel cross-entropy loss
-> - AdaGrad, RMSProp and AdamW
+> - AdamW, AdaGrad, RMSProp 
+> - Performance optimisations 
 > - Documentation and notes
 
 

@@ -18,9 +18,9 @@ impl MeanSquareErrorLoss {
                     .zip(ys_i)
                     .map(|(ypred_j, ys_j)| (ypred_j - ys_j).pow(2.0))
                     .sum::<Value>()
-                    / ypred_i.len() as f64
+                    / ypred_i.len() as f32
             })
             .sum::<Value>()
-            / ypred.len() as f64
+            / ypred.len() as f32
     }
 }

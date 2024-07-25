@@ -2,11 +2,11 @@ use crate::engine::Value;
 
 #[derive(Debug)]
 pub struct BinaryAccuracy {
-    threshold: f64,
+    threshold: f32,
 }
 
 impl BinaryAccuracy {
-    pub fn new(threshold: f64) -> BinaryAccuracy {
+    pub fn new(threshold: f32) -> BinaryAccuracy {
         BinaryAccuracy { threshold }
     }
 
@@ -14,7 +14,7 @@ impl BinaryAccuracy {
         &self,
         ypred: &Vec<Vec<Value>>,
         ys: &Vec<Vec<Value>>,
-    ) -> f64 {
+    ) -> f32 {
         ypred
             .iter()
             .zip(ys)
@@ -28,7 +28,7 @@ impl BinaryAccuracy {
                     })
                     .count()
             })
-            .sum::<usize>() as f64
-            / (ypred.len() * ypred[0].len()) as f64
+            .sum::<usize>() as f32
+            / (ypred.len() * ypred[0].len()) as f32
     }
 }

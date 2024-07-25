@@ -1,12 +1,11 @@
 use crate::engine::Value;
 
-// Use for binary classification when target values are -1 an 1.
 #[derive(Debug)]
-pub struct HingeLoss;
+pub struct CrossEntropyLoss;
 
-impl HingeLoss {
-    pub fn new() -> HingeLoss {
-        HingeLoss
+impl CrossEntropyLoss {
+    pub fn new() -> CrossEntropyLoss {
+        CrossEntropyLoss
     }
 
     pub fn loss(
@@ -16,12 +15,12 @@ impl HingeLoss {
     ) -> Value {
         ypred
             .iter()
-            .zip(ytrue.iter())
+            .zip(ytrue)
             .map(|(ypred_i, ytrue_i)| {
                 ypred_i
                     .iter()
                     .zip(ytrue_i)
-                    .map(|(ypred_j, ytrue)| (1.0 - ytrue * ypred_j).relu())
+                    .map(|(ypred_j, ytrue_j)| -(ytrue_j * ypred_j.ln()))
                     .sum::<Value>()
             })
             .sum::<Value>()

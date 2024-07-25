@@ -1,3 +1,3 @@
-mod binary_acc;
+mod binary;
 
-pub use binary_acc::*;
+pub use binary::*;

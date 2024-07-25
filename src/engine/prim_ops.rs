@@ -15,7 +15,7 @@ fn add(self: Value, rhs: Value) -> Value {
 }
 
 #[opimps::impl_ops_rprim(ops::Add)]
-fn add(self: Value, rhs: f64) -> Value {
+fn add(self: Value, rhs: f32) -> Value {
     Value::init(
         self.borrow().data + rhs,
         Some(add_backward),
@@ -26,7 +26,7 @@ fn add(self: Value, rhs: f64) -> Value {
 }
 
 #[opimps::impl_ops_lprim(ops::Add)]
-fn add(self: f64, rhs: Value) -> Value {
+fn add(self: f32, rhs: Value) -> Value {
     Value::init(
         self + rhs.borrow().data,
         Some(add_backward),
@@ -55,7 +55,7 @@ fn mul(self: Value, rhs: Value) -> Value {
 }
 
 #[opimps::impl_ops_rprim(ops::Mul)]
-fn mul(self: Value, rhs: f64) -> Value {
+fn mul(self: Value, rhs: f32) -> Value {
     Value::init(
         self.borrow().data * rhs,
         Some(mul_backward),
@@ -66,7 +66,7 @@ fn mul(self: Value, rhs: f64) -> Value {
 }
 
 #[opimps::impl_ops_lprim(ops::Mul)]
-fn mul(self: f64, rhs: Value) -> Value {
+fn mul(self: f32, rhs: Value) -> Value {
     Value::init(
         self * rhs.borrow().data,
         Some(mul_backward),
@@ -86,7 +86,7 @@ fn mul_backward(value: &V) {
 // Power, Ln and Exp
 
 impl Value {
-    pub fn pow(&self, power: f64) -> Value {
+    pub fn pow(&self, power: f32) -> Value {
         Value::init(
             self.borrow().data.powf(power),
             Some(|value: &V| {
@@ -127,7 +127,7 @@ impl Value {
     }
 
     // For initialising constants
-    fn new_const(data: f64) -> Value {
+    fn new_const(data: f32) -> Value {
         Value::init(data, None, Vec::new(), None, None)
     }
 }

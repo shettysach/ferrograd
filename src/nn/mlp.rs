@@ -21,7 +21,7 @@ impl MultiLayerPerceptron {
             .map(|i| {
                 let nin = nouts[i];
                 let nout = nouts[i + 1];
-                let nonlin = if i == n - 1 { None } else { Some(actv_fn) };
+                let nonlin = if i == n - 1 { None } else { Some(actv_fn) }; // Last layer is linear
 
                 Layer::new(nin, nout, nonlin)
             })
@@ -30,11 +30,16 @@ impl MultiLayerPerceptron {
         MultiLayerPerceptron { layers }
     }
 
-    /// Forward pass of input x through the MLP.
-    pub fn forward(&self, x: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
+    /// Forward pass of single input x through the MLP.
+    pub fn forw(&self, x: &Vec<Value>) -> Vec<Value> {
         self.layers
             .iter()
-            .fold(x.clone(), |x, layer| layer.forward(&x))
+            .fold(x.clone(), |x, layer| layer.forw(&x))
+    }
+
+    /// Forward pass of input xs through the MLP.
+    pub fn forward(&self, xs: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
+        xs.iter().map(|xrow| self.forw(&xrow)).collect()
     }
 
     /// Returns weights and biases of all the neurons of the perceptron.
@@ -46,8 +51,19 @@ impl MultiLayerPerceptron {
 impl fmt::Display for MultiLayerPerceptron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let _ = self.layers.iter().enumerate().for_each(|(i, layer)| {
-            write!(f, "layer {} - {}\n", i, layer).unwrap();
+            write!(f, "  layer {}: [ {} ]\n", i, layer).unwrap();
         });
         Ok(())
+    }
+}
+
+impl fmt::Debug for MultiLayerPerceptron {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut debug_struct = f.debug_struct("MultiLayerPerceptron");
+        debug_struct.field("parameters", &self.parameters().len());
+        self.layers.iter().enumerate().for_each(|(i, layer)| {
+            debug_struct.field(&format!("layer {}", i), layer);
+        });
+        debug_struct.finish()
     }
 }

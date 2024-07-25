@@ -1,6 +1,6 @@
 use ferrograd::{
     engine::{Activation, Value},
-    loss::BinaryCrossEntropyLoss,
+    loss::{softmax, CrossEntropyLoss},
     metrics::BinaryAccuracy,
     nn::{
         optim::{l2_regularization, Adam},
@@ -16,11 +16,11 @@ fn main() {
     println!("Number of parameters = {}\n", model.parameters().len());
 
     let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 0.00000001);
-    let loss = BinaryCrossEntropyLoss::new();
-    let accuracy = BinaryAccuracy::new(0.0);
+    let loss = CrossEntropyLoss::new();
+    let accuracy = BinaryAccuracy::new(0.5);
 
-    (0..150).for_each(|k| {
-        let ypred: Vec<Vec<Value>> = model.forward(&xs);
+    (0..100).for_each(|k| {
+        let ypred = softmax(&model.forward(&xs));
 
         let data_loss = loss.loss(&ypred, &ys);
         let reg_loss = l2_regularization(0.0001, model.parameters());
@@ -39,10 +39,40 @@ fn main() {
             acc * 100.0
         );
     });
+
+    let samples = vec![
+        vec![5.1, 3.5, 1.4, 0.2],
+        vec![7.2, 2.7, 6.0, 2.0],
+        vec![5.8, 2.7, 3.9, 1.2],
+    ];
+    let x = samples
+        .iter()
+        .map(|vec| vec.iter().map(|f| Value::new(*f)).collect())
+        .collect();
+
+    let preds = model.forward(&x);
+
+    println!();
+    for (sample, pred) in samples.iter().zip(preds) {
+        let argmax = pred
+            .iter()
+            .enumerate()
+            .max_by_key(|(_, v)| *v)
+            .map(|(ind, _)| ind);
+
+        let res = match argmax {
+            Some(0) => Ok("Iris-setosa"),
+            Some(1) => Ok("Iris-versicolor"),
+            Some(2) => Ok("Iris-virginica"),
+            _ => Err("Error predicting value"),
+        };
+
+        print!("X: {:?} => ", sample);
+        println!("ypred: {:?}", res);
+    }
 }
 
 // --- Dataloader ---
-// https://github.com/Mathemmagician/rustygrad/blob/dev/src/utils.rs
 
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -58,7 +88,7 @@ fn read_iris_csv() -> (Vec<Vec<Value>>, Vec<Vec<Value>>) {
             let fields: Vec<&str> = line.split(',').collect();
 
             let x_vec = (0..4)
-                .map(|i| Value::new(fields[i].parse::<f64>().unwrap()))
+                .map(|i| Value::new(fields[i].parse::<f32>().unwrap()))
                 .collect();
 
             let y_vec = match fields[4] {

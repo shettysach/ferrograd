@@ -4,12 +4,12 @@ use std::fmt;
 /// Adam optimizer.
 pub struct Adam {
     params: Vec<Value>,
-    lr: f64,
-    beta1: f64,
-    beta2: f64,
-    epsilon: f64,
-    m: Vec<f64>,
-    v: Vec<f64>,
+    lr: f32,
+    beta1: f32,
+    beta2: f32,
+    epsilon: f32,
+    m: Vec<f32>,
+    v: Vec<f32>,
     t: usize,
 }
 
@@ -17,10 +17,10 @@ impl Adam {
     /// Initialise new optimizer.
     pub fn new(
         params: Vec<Value>,
-        lr: f64,
-        beta1: f64,
-        beta2: f64,
-        epsilon: f64,
+        lr: f32,
+        beta1: f32,
+        beta2: f32,
+        epsilon: f32,
     ) -> Adam {
         let m = vec![0.0; params.len()];
         let v = vec![0.0; params.len()];

@@ -1,9 +1,9 @@
 mod layer;
+mod mlp;
 mod neuron;
-mod perceptron;
 
 pub use layer::*;
+pub use mlp::*;
 pub use neuron::*;
-pub use perceptron::*;
 
 pub mod optim;
