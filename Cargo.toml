@@ -8,3 +8,6 @@ opimps = "0.2.2"
 rand = "0.8.5"
 termtree = "0.4.1"
 uuid = { version = "1.9.1", features = ["v4"] }
+
+[dev-dependencies]
+rust-mnist = "0.2"

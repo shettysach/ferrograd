@@ -57,8 +57,8 @@ fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
             (-bound..bound)
                 .map(|x| {
                     let k = &model.forward(&vec![vec![
-                        Value::new(x as f32 / bound as f32 * 2.0),
-                        Value::new(-y as f32 / bound as f32 * 2.0),
+                        Value::new(x as f64 / bound as f64 * 2.0),
+                        Value::new(-y as f64 / bound as f64 * 2.0),
                     ]])[0][0];
 
                     if k.borrow().data > 0.5 {

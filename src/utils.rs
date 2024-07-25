@@ -32,12 +32,12 @@ pub fn read_csv(
 
             let x_vec = x_inds
                 .iter()
-                .map(|i| Value::new(fields[*i].parse::<f32>().unwrap()))
+                .map(|i| Value::new(fields[*i].parse::<f64>().unwrap()))
                 .collect();
 
             let y_vec = y_inds
                 .iter()
-                .map(|i| Value::new(fields[*i].parse::<f32>().unwrap()))
+                .map(|i| Value::new(fields[*i].parse::<f64>().unwrap()))
                 .collect();
 
             (x_vec, y_vec)

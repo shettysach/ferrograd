@@ -19,6 +19,11 @@ fn main() {
     let loss = CrossEntropyLoss::new();
     let accuracy = BinaryAccuracy::new(0.5);
 
+    println!(
+        "Optimiser: {:#?}\n\nCriterion: {:#?}\n\nMetric: {:#?}\n",
+        optim, loss, accuracy
+    );
+
     (0..100).for_each(|k| {
         let ypred = softmax(&model.forward(&xs));
 
@@ -88,7 +93,7 @@ fn read_iris_csv() -> (Vec<Vec<Value>>, Vec<Vec<Value>>) {
             let fields: Vec<&str> = line.split(',').collect();
 
             let x_vec = (0..4)
-                .map(|i| Value::new(fields[i].parse::<f32>().unwrap()))
+                .map(|i| Value::new(fields[i].parse::<f64>().unwrap()))
                 .collect();
 
             let y_vec = match fields[4] {

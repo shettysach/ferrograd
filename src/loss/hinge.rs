@@ -25,6 +25,6 @@ impl HingeLoss {
                     .sum::<Value>()
             })
             .sum::<Value>()
-            / (ypred.len() * ypred[0].len()) as f32
+            / (ypred.len() * ypred[0].len()) as f64
     }
 }

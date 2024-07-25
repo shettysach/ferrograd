@@ -4,14 +4,14 @@ use std::fmt;
 /// Stochastic Gradient Descent optimizer with momentum.
 pub struct SGD {
     params: Vec<Value>,
-    lr: f32,
-    momentum: f32,
-    velocities: Vec<f32>,
+    lr: f64,
+    momentum: f64,
+    velocities: Vec<f64>,
 }
 
 impl SGD {
     /// Initialise new optimizer.
-    pub fn new(params: Vec<Value>, lr: f32, momentum: f32) -> SGD {
+    pub fn new(params: Vec<Value>, lr: f64, momentum: f64) -> SGD {
         let velocities = vec![0.0; params.len()];
 
         SGD {

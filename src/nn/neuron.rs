@@ -13,7 +13,7 @@ impl Neuron {
     /// Initialise new Neuron with uniformly distributed random weights and zero bias.
     pub fn new(nin: u32, nonlin: Option<Activation>) -> Neuron {
         let mut rng = rand::thread_rng();
-        let range = Uniform::<f32>::new(-1., 1.);
+        let range = Uniform::<f64>::new(-1., 1.);
 
         Neuron {
             w: (0..nin).map(|_| Value::new(rng.sample(range))).collect(),

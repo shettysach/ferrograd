@@ -4,7 +4,10 @@
 - See `/notes/Gradients.md` for explanation of gradients and backward functions, and `/notes/Optimizers.md` for the equations and step functions of optimizers.
 - Capable of creating neurons, dense layers and multilayer perceptrons, for non-linear classification tasks.
 
-> NOTE: WIP
+> NOTE: 
+> - Created for learning purposes. Not optimized for performance and uses scalar values and operations, not vectors.
+> - To run the MNIST example, download the [data](https://yann.lecun.com/exdb/mnist/), gzip extract all 4 files, and move them to the directory `/data/mnist/`.  
+> - If the MNIST example takes a huge amount of time to train, reduce model parameters and number of samples. However, this could reduce the accuracy of the model. 
 
 #### Examples
 
@@ -41,7 +44,7 @@ fn main() {
 ```
 
 ```console
-cargo run --example readme
+cargo run --example readme --release
 ```
 
 ```
@@ -82,32 +85,32 @@ fn main() {
 ```
 
 ```console
-cargo run --example neuron
+cargo run --example neuron --release
 ```
 
 ```
 ReLU(2)
 
 Forward pass:
-ReLU data = 1.800, grad = 0.000 
-└── + data = 1.800, grad = 0.000 
-    ├── + data = 1.800, grad = 0.000 
-    │   ├── * data = 1.911, grad = 0.000 
+ReLU data = 1.800, grad = 0.000
+└── + data = 1.800, grad = 0.000
+    ├── + data = 1.800, grad = 0.000
+    │   ├── * data = 1.911, grad = 0.000
     │   │   ├── data = 0.955, grad = 0.000 ← weight[0]
     │   │   └── data = 2.000, grad = 0.000 ← x[0][0]
-    │   └── * data = -0.111, grad = 0.000 
+    │   └── * data = -0.111, grad = 0.000
     │       ├── data = -0.111, grad = 0.000 ← weight[1]
     │       └── data = 1.000, grad = 0.000 ← x[1][0]
     └── data = 0.000, grad = 0.000 ← bias
 
 Backward pass:
-ReLU data = 1.800, grad = 1.000 
-└── + data = 1.800, grad = 1.000 
-    ├── + data = 1.800, grad = 1.000 
-    │   ├── * data = 1.911, grad = 1.000 
+ReLU data = 1.800, grad = 1.000
+└── + data = 1.800, grad = 1.000
+    ├── + data = 1.800, grad = 1.000
+    │   ├── * data = 1.911, grad = 1.000
     │   │   ├── data = 0.955, grad = 2.000 ← weight[0]
     │   │   └── data = 2.000, grad = 0.955 ← x[0][0]
-    │   └── * data = -0.111, grad = 1.000 
+    │   └── * data = -0.111, grad = 1.000
     │       ├── data = -0.111, grad = 1.000 ← weight[1]
     │       └── data = 1.000, grad = -0.111 ← x[1][0]
     └── data = 0.000, grad = 1.000 ← bias
@@ -168,7 +171,7 @@ fn main() {
 ```
 
 ```console
-cargo run --example moons
+cargo run --example moons --release
 ```
 
 ```
@@ -268,7 +271,7 @@ fn main() {
 ```
 
 ```console
-cargo run --example circles
+cargo run --example circles --release
 ```
 
 ```
@@ -277,9 +280,9 @@ step 97 - loss 0.022, accuracy 100.00%
 step 98 - loss 0.022, accuracy 100.00%
 step 99 - loss 0.021, accuracy 100.00%
 
-ASCII contour graph - 
-■ > 0.5  
-□ <= 0.5 
+ASCII contour graph -
+■ > 0.5
+□ <= 0.5
 
 □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
 □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
@@ -315,11 +318,128 @@ ASCII contour graph -
 
 ---
 
-> TODO: 
-> - AdamW, AdaGrad, RMSProp 
-> - Performance optimisations 
-> - Documentation and notes
+##### MNIST dataset
 
+```rust
+use ferrograd::{
+    engine::{Activation, Value},
+    loss::{softmax, CrossEntropyLoss},
+    metrics::BinaryAccuracy,
+    nn::{
+        optim::{l2_regularization, Adam},
+        MultiLayerPerceptron,
+    },
+};
+use rust_mnist::{print_image, Mnist};
+
+fn main() {
+    // ... Loading MNIST training data
+
+    let model =
+        MultiLayerPerceptron::new(764, vec![32, 32, 10], Activation::ReLU);
+    println!("Model - \n{}", model);
+    println!("Number of parameters = {}\n", model.parameters().len());
+
+    let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 1e-4);
+    let loss = CrossEntropyLoss::new();
+    let accuracy = BinaryAccuracy::new(0.5);
+
+    (0..100).for_each(|k| {
+        let ypred = softmax(&model.forward(&xtrain));
+
+        let data_loss = loss.loss(&ypred, &ytrain);
+        let reg_loss = l2_regularization(0.0001, model.parameters());
+        let total_loss = data_loss + reg_loss;
+
+        optim.zero_grad();
+        total_loss.backward();
+        optim.step();
+
+        let acc = accuracy.compute(&ypred, &ytrain);
+
+        println!(
+            "step {} - loss {:.3}, accuracy {:.2}%",
+            k,
+            total_loss.borrow().data,
+            acc * 100.0
+        );
+    });
+
+    // ... Loading MNIST test data
+
+    let ypred = softmax(&model.forward(&xtest));
+    let mut correct = 0;
+    let total = 10;
+
+    for i in 0..total {
+        let argmax = ypred[i]
+            .iter()
+            .enumerate()
+            .max_by_key(|(_, v)| *v)
+            .map(|(ind, _)| ind)
+            .expect("Error  in prediction");
+
+        let img = &mnist.test_data[i];
+        let label = mnist.test_labels[i];
+
+        if label as usize == argmax {
+            correct += 1
+        }
+
+        print_image(img, label);
+        println!("Prediction: {}\n", argmax);
+    }
+
+    println!("Correct predictions: {}/{}", correct, total);
+}
+```
+
+```console
+cargo run --example mnist --release
+```
+
+```
+# ...
+
+Sample image label: 9
+Sample image:
+________________________________________________________
+________________________________________________________
+________________________________________________________
+________________________________________________________
+________________________________________________________
+________________________________________________________
+________________________________________________________
+__________________________##############________________
+______________________########################__________
+__________________############################__________
+________________##############____##############________
+____________##############________##############________
+____________##########________##################________
+____________##################################__________
+____________################################____________
+________________##########################______________
+____________________________############________________
+__________________________##########____________________
+________________________############____________________
+______________________############______________________
+______________________##########________________________
+____________________##########__________________________
+__________________############__________________________
+__________________##########____________________________
+__________________########______________________________
+__________________########______________________________
+__________________######________________________________
+________________________________________________________
+Prediction: 9
+
+Correct predictions: 9/10
+```
+
+> TODO:
+> - AdamW, AdaGrad, RMSProp
+> - Some performance optimisations
+> - Documentation and notes
 
 ###### Credits
 

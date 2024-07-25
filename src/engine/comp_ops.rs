@@ -16,12 +16,12 @@ fn sub(self: Value, rhs: Value) -> Value {
 }
 
 #[opimps::impl_ops_rprim(ops::Sub)]
-fn sub(self: Value, rhs: f32) -> Value {
+fn sub(self: Value, rhs: f64) -> Value {
     self + (-rhs)
 }
 
 #[opimps::impl_ops_lprim(ops::Sub)]
-fn sub(self: f32, rhs: Value) -> Value {
+fn sub(self: f64, rhs: Value) -> Value {
     self + (-rhs)
 }
 
@@ -33,12 +33,12 @@ fn div(self: Value, rhs: Value) -> Value {
 }
 
 #[opimps::impl_ops_rprim(ops::Div)]
-fn div(self: Value, rhs: f32) -> Value {
+fn div(self: Value, rhs: f64) -> Value {
     self * rhs.powf(-1.0)
 }
 
 #[opimps::impl_ops_lprim(ops::Div)]
-fn div(self: f32, rhs: Value) -> Value {
+fn div(self: f64, rhs: Value) -> Value {
     self * rhs.pow(-1.0)
 }
 

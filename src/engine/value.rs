@@ -7,8 +7,8 @@ pub struct Value(Rc<RefCell<V>>); // Smart pointer to V
 
 // Struct that holds the data
 pub struct V {
-    pub data: f32,
-    pub grad: f32,
+    pub data: f64,
+    pub grad: f64,
     pub _backward: Option<fn(value: &V)>, // Function pointer to the backward function
     pub _prev: Vec<Value>,                // Children (Operands)
     pub _op: Option<Operation>,           // None if initialisation or constant
@@ -27,7 +27,7 @@ impl ops::Deref for Value {
 
 impl Value {
     pub fn init(
-        data: f32,
+        data: f64,
         backward: Option<fn(value: &V)>,
         prev: Vec<Value>,
         op: Option<Operation>,
@@ -45,7 +45,7 @@ impl Value {
     }
 
     /// Initialise new Value.
-    pub fn new(data: f32) -> Value {
+    pub fn new(data: f64) -> Value {
         Value::init(data, None, Vec::new(), None, Some(String::new()))
     }
 }
