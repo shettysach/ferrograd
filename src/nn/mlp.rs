@@ -51,6 +51,7 @@ impl MultiLayerPerceptron {
 impl fmt::Display for MultiLayerPerceptron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let _ = self.layers.iter().enumerate().for_each(|(i, layer)| {
+            write!(f, "MLP:").unwrap();
             write!(f, "  layer {}: [ {} ]\n", i, layer).unwrap();
         });
         Ok(())

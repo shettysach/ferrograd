@@ -13,7 +13,7 @@ fn main() {
     let (xs, ys) = read_csv("data/moons_data.csv", &[0, 1], &[2], 1);
 
     let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::ReLU);
-    println!("Model: \n{}", model);
+    println!("{}", model);
     println!("Number of parameters: {}\n", model.parameters().len());
 
     let mut optim = SGD::new(model.parameters(), 0.1, 0.9);
@@ -46,6 +46,7 @@ fn main() {
         );
     });
 
+    println!();
     print_grid(&model, 15);
 }
 
@@ -53,25 +54,19 @@ fn main() {
 
 fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
     println!("\nASCII contour graph - \n■ > 0.0  \n□ <= 0.0 ");
-    let grid: Vec<Vec<&str>> = (-bound..bound)
-        .map(|y| {
-            (-bound..bound)
-                .map(|x| {
-                    let k = &model.forward(&vec![vec![
-                        Value::new(x as f64 / bound as f64 * 2.0),
-                        Value::new(-y as f64 / bound as f64 * 2.0),
-                    ]])[0][0];
+    (-bound..bound).for_each(|y| {
+        (-bound..bound).for_each(|x| {
+            let k = &model.forward(&vec![vec![
+                Value::new(x as f64 / bound as f64 * 2.0),
+                Value::new(-y as f64 / bound as f64 * 2.0),
+            ]])[0][0];
 
-                    if k.borrow().data > 0.0 {
-                        "■"
-                    } else {
-                        "□"
-                    }
-                })
-                .collect()
-        })
-        .collect();
-
-    println!();
-    grid.iter().for_each(|row| println!("{}", row.join(" ")));
+            if k.borrow().data > 0.0 {
+                print!("■ ");
+            } else {
+                print!("□ ");
+            }
+        });
+        println!();
+    });
 }

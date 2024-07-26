@@ -15,7 +15,7 @@ fn main() {
     println!("Model - \n{}", model);
     println!("Number of parameters = {}\n", model.parameters().len());
 
-    let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 0.00000001);
+    let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 1e-8);
     let loss = CrossEntropyLoss::new();
     let accuracy = BinaryAccuracy::new(0.5);
 

@@ -7,31 +7,19 @@ use ferrograd::{
         MultiLayerPerceptron,
     },
 };
-use rust_mnist::{print_image, Mnist};
 
 fn main() {
     // Loading training data
-    let mnist = Mnist::new("data/mnist/");
-    let xtrain: Vec<Vec<Value>> = mnist.train_data[..200] // training with only 200 samples.
-        .iter()
-        .map(|img| {
-            img.iter()
-                .map(|pix| Value::new(*pix as f64 / 255.0))
-                .collect()
-        })
-        .collect();
-    let ytrain: Vec<Vec<Value>> = mnist.train_labels[..200]
-        .iter()
-        .map(|label| one_hot(*label))
-        .collect();
+    let batch_size = 100;
+    let mnist = rust_mnist::Mnist::new("data/mnist/");
 
     // MLP
     let model =
-        MultiLayerPerceptron::new(764, vec![32, 32, 10], Activation::ReLU);
+        MultiLayerPerceptron::new(784, vec![64, 32, 10], Activation::LeakyReLU);
     println!("Model: {:#?}\n", model);
 
     // Optimizer, loss criterion and accuracy metric
-    let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 1e-4);
+    let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 1e-8);
     let loss = CrossEntropyLoss::new();
     let accuracy = BinaryAccuracy::new(0.5);
 
@@ -40,8 +28,27 @@ fn main() {
         optim, loss, accuracy
     );
 
+    let model_path = "model/mod_64x32";
+
     // Training
-    (0..100).for_each(|k| {
+    (0..200).for_each(|k| {
+        let b = k % 10;
+        let start = b * batch_size;
+        let end = (b + 1) * batch_size;
+
+        let xtrain: Vec<Vec<Value>> = mnist.train_data[start..end]
+            .iter()
+            .map(|img| {
+                img.iter()
+                    .map(|pix| Value::new(*pix as f64 / 255.0))
+                    .collect()
+            })
+            .collect();
+        let ytrain: Vec<Vec<Value>> = mnist.train_labels[start..end]
+            .iter()
+            .map(|label| one_hot(*label))
+            .collect();
+
         let ypred = softmax(&model.forward(&xtrain));
 
         let data_loss = loss.loss(&ypred, &ytrain);
@@ -60,12 +67,21 @@ fn main() {
             total_loss.borrow().data,
             acc * 100.0
         );
+
+        // Save at every 10th step
+        if b == 9 {
+            match model.save(model_path) {
+                Ok(_) => {
+                    println!("\n> Model saved successfully at {model_path}\n")
+                }
+                Err(err) => eprintln!("{}", err),
+            };
+        }
     });
 
-    println!();
-
     // Loading training data
-    let xtest: Vec<Vec<Value>> = mnist.test_data[..10]
+    let test_samples = 100;
+    let xtest: Vec<Vec<Value>> = mnist.test_data[..test_samples]
         .iter()
         .map(|img| {
             img.iter()
@@ -75,30 +91,25 @@ fn main() {
         .collect();
 
     // Making predictions
+    println!("Testing");
     let ypred = softmax(&model.forward(&xtest));
     let mut correct = 0;
-    let total = 10;
 
-    for i in 0..total {
-        let argmax = ypred[i]
+    for i in 0..test_samples {
+        let (argmax, _) = ypred[i]
             .iter()
             .enumerate()
             .max_by_key(|(_, v)| *v)
-            .map(|(ind, _)| ind)
+            .map(|(ind, v)| (ind, v.borrow().data))
             .expect("Error  in prediction");
 
-        let img = &mnist.test_data[i];
         let label = mnist.test_labels[i];
-
         if label as usize == argmax {
             correct += 1
         }
-
-        print_image(img, label);
-        println!("Prediction: {}\n", argmax);
     }
 
-    println!("Correct predictions: {}/{}", correct, total);
+    println!("Correct predictions: {}/{}", correct, test_samples);
 }
 
 fn one_hot(digit: u8) -> Vec<Value> {

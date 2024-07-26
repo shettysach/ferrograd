@@ -15,7 +15,7 @@ fn main() {
     let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::ReLU);
     println!("Model: {:#?}\n", model);
 
-    let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 1e-4);
+    let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 1e-8);
     let loss = BinaryCrossEntropyLoss::new();
     let accuracy = BinaryAccuracy::new(0.5);
 
@@ -45,32 +45,27 @@ fn main() {
         );
     });
 
+    println!();
     print_grid(&model, 15);
 }
 
 // -- Grid --
 
 fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
-    println!("\nASCII contour graph - \n■ > 0.5  \n□ <= 0.5 ");
-    let grid: Vec<Vec<&str>> = (-bound..bound)
-        .map(|y| {
-            (-bound..bound)
-                .map(|x| {
-                    let k = &model.forward(&vec![vec![
-                        Value::new(x as f64 / bound as f64 * 2.0),
-                        Value::new(-y as f64 / bound as f64 * 2.0),
-                    ]])[0][0];
+    println!("\nASCII contour graph - \n■ > 0.0  \n□ <= 0.0 ");
+    (-bound..bound).for_each(|y| {
+        (-bound..bound).for_each(|x| {
+            let k = &model.forward(&vec![vec![
+                Value::new(x as f64 / bound as f64 * 2.0),
+                Value::new(-y as f64 / bound as f64 * 2.0),
+            ]])[0][0];
 
-                    if k.borrow().data > 0.5 {
-                        "■"
-                    } else {
-                        "□"
-                    }
-                })
-                .collect()
-        })
-        .collect();
-
-    println!();
-    grid.iter().for_each(|row| println!("{}", row.join(" ")));
+            if k.borrow().data > 0.0 {
+                print!("■ ");
+            } else {
+                print!("□ ");
+            }
+        });
+        println!();
+    });
 }

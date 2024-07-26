@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+byteorder = "1.5.0"
 opimps = "0.2.2"
 rand = "0.8.5"
 termtree = "0.4.1"

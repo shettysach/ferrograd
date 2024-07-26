@@ -35,7 +35,7 @@ impl fmt::Display for Layer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.neurons.iter().next() {
             Some(neuron) => {
-                write!(f, "{} -> {}", neuron, self.neurons.len())
+                write!(f, "{} → {}", neuron, self.neurons.len())
             }
             None => write!(f, "Empty"),
         }
