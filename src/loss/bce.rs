@@ -1,6 +1,7 @@
 use crate::engine::Value;
 
-// Use for binary classification when target values are 0 an 1.
+/** Binary Cross-Entropy loss
+For binary classification, when targets are -1 and 1.*/
 #[derive(Debug)]
 pub struct BinaryCrossEntropyLoss;
 
@@ -22,7 +23,7 @@ impl BinaryCrossEntropyLoss {
                     .iter()
                     .zip(ytrue_i)
                     .map(|(ypred_j, ytrue_j)| {
-                        (ytrue_j * ypred_j.ln())
+                        ytrue_j * ypred_j.ln()
                             + (1.0 - ytrue_j) * (1.0 - ypred_j).ln()
                     })
                     .sum::<Value>()

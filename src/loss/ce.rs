@@ -1,5 +1,7 @@
 use crate::engine::Value;
 
+/** Cross-Entropy loss
+For multiclass and multilabel classification.*/
 #[derive(Debug)]
 pub struct CrossEntropyLoss;
 
@@ -13,14 +15,14 @@ impl CrossEntropyLoss {
         ypred: &Vec<Vec<Value>>,
         ytrue: &Vec<Vec<Value>>,
     ) -> Value {
-        ypred
+        -ypred
             .iter()
             .zip(ytrue)
             .map(|(ypred_i, ytrue_i)| {
                 ypred_i
                     .iter()
                     .zip(ytrue_i)
-                    .map(|(ypred_j, ytrue_j)| -(ytrue_j * ypred_j.ln()))
+                    .map(|(ypred_j, ytrue_j)| ytrue_j * ypred_j.ln())
                     .sum::<Value>()
             })
             .sum::<Value>()

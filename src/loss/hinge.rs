@@ -1,6 +1,7 @@
 use crate::engine::Value;
 
-// Use for binary classification when target values are -1 an 1.
+/** Hinge loss
+For binary classification, when targets are 0 and 1.*/
 #[derive(Debug)]
 pub struct HingeLoss;
 

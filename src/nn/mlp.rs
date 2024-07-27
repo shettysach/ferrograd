@@ -30,19 +30,19 @@ impl MultiLayerPerceptron {
         MultiLayerPerceptron { layers }
     }
 
-    /// Forward pass of single input x through the MLP.
+    /// Forward pass of a single 1d input x through the MLP.
     pub fn forw(&self, x: &Vec<Value>) -> Vec<Value> {
         self.layers
             .iter()
             .fold(x.clone(), |x, layer| layer.forw(&x))
     }
 
-    /// Forward pass of input xs through the MLP.
-    pub fn forward(&self, xs: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
-        xs.iter().map(|xrow| self.forw(&xrow)).collect()
+    /// Forward pass of 2d input x through the MLP.
+    pub fn forward(&self, x: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
+        x.iter().map(|xrow| self.forw(&xrow)).collect()
     }
 
-    /// Returns weights and biases of all the neurons of the perceptron.
+    /// Returns 1d vec of weights and biases of all the neurons of the perceptron.
     pub fn parameters(&self) -> Vec<Value> {
         self.layers.iter().flat_map(|l| l.parameters()).collect()
     }

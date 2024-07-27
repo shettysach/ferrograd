@@ -1,5 +1,7 @@
 use crate::engine::Value;
 
+/** Mean Square Error loss (MSE)
+To use Root Mean Square Error loss (RMSE), use `mse.loss().pow(0.5)`.*/
 #[derive(Debug)]
 pub struct MeanSquareErrorLoss {}
 
@@ -8,15 +10,19 @@ impl MeanSquareErrorLoss {
         MeanSquareErrorLoss {}
     }
 
-    pub fn loss(&self, ypred: &Vec<Vec<Value>>, ys: &Vec<Vec<Value>>) -> Value {
+    pub fn loss(
+        &self,
+        ypred: &Vec<Vec<Value>>,
+        ytrue: &Vec<Vec<Value>>,
+    ) -> Value {
         ypred
             .iter()
-            .zip(ys)
-            .map(|(ypred_i, ys_i)| {
+            .zip(ytrue)
+            .map(|(ypred_i, ytrue_i)| {
                 ypred_i
                     .iter()
-                    .zip(ys_i)
-                    .map(|(ypred_j, ys_j)| (ypred_j - ys_j).pow(2.0))
+                    .zip(ytrue_i)
+                    .map(|(ypred_j, ytrue_j)| (ytrue_j - ypred_j).pow(2.0))
                     .sum::<Value>()
                     / ypred_i.len() as f64
             })

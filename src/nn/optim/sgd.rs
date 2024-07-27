@@ -1,7 +1,7 @@
 use crate::engine::Value;
 use std::fmt;
 
-/// Stochastic Gradient Descent optimizer with momentum.
+/// Stochastic Gradient Descent with momentum.
 pub struct SGD {
     params: Vec<Value>,
     lr: f64,

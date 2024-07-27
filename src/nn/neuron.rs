@@ -22,7 +22,7 @@ impl Neuron {
         }
     }
 
-    /// Forward pass of single input x through the Neuron.
+    /// Forward pass of a single 1d input x through the Neuron.
     pub fn forw(&self, x: &Vec<Value>) -> Value {
         let act = self
             .w
@@ -41,12 +41,12 @@ impl Neuron {
         }
     }
 
-    /// Forward pass of input x through the Neuron.
+    /// Forward pass of 2d input x through the Neuron.
     pub fn forward(&self, x: &Vec<Vec<Value>>) -> Vec<Value> {
         x.iter().map(|x_i| self.forw(x_i)).collect()
     }
 
-    /// Returns vector of weights and bias
+    /// Returns 1d vector of weights and bias.
     pub fn parameters(&self) -> Vec<Value> {
         let mut p = self.w.clone();
         p.push(self.b.clone());
@@ -92,11 +92,9 @@ impl Neuron {
         Neuron { w, b, nonlin }
     }
 
-    /**
-    Assign `var_names` for inputs as `x[i][j]`,
-    - `i` stands for the ith feature
-    - `j` stands for the jth sample.
-    */
+    /** Assign `var_names` for inputs as `x[i][j]`.
+    `i` stands for the ith feature.
+    `j` stands for the jth sample. */
     pub fn name_inputs(&self, x: Vec<Vec<Value>>) -> Vec<Vec<Value>> {
         x.iter()
             .enumerate()

@@ -1,7 +1,7 @@
 use crate::engine::Value;
 use std::fmt;
 
-/// RMSprop optimizer.
+/// Root Mean Squared Propagation.
 pub struct RMSprop {
     params: Vec<Value>,
     lr: f64,

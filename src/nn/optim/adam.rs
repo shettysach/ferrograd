@@ -1,7 +1,7 @@
 use crate::engine::Value;
 use std::fmt;
 
-/// Adam optimizer.
+/// Adaptive Moment Estimation.
 pub struct Adam {
     params: Vec<Value>,
     lr: f64,

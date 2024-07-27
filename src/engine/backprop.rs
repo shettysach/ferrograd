@@ -22,7 +22,7 @@ impl Value {
         });
     }
 
-    /// Topological sort for order.
+    // Topological sort for order.
     fn topological_sort(
         &self,
         topo: &mut Vec<Value>,

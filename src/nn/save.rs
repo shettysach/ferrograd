@@ -5,7 +5,7 @@ use std::{fs::File, io::Result, path::Path};
 // Thanks to https://gist.github.com/rust-play/e710e311a2ad808b5a8789d5e4457426
 
 impl MultiLayerPerceptron {
-    /// Save model weights.
+    /// Save model weights at the given filepath.
     pub fn save(&self, filepath: &str) -> Result<()> {
         let mut file = File::create(filepath)?;
         let model_weights = self
@@ -20,7 +20,7 @@ impl MultiLayerPerceptron {
         Ok(())
     }
 
-    /// Read model weights an load state.
+    /// Read model weights from the given filepath and load state.
     pub fn load<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let mut file = File::open(path)?;
         let buf_len: usize = file.metadata()?.len() as usize / 8; // 8 bytes for one f64

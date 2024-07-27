@@ -1,6 +1,7 @@
 use crate::engine::value::{Activation, Operation, Value, V};
 
 impl Value {
+    /// Rectified Linear Unit
     pub fn relu(&self) -> Value {
         Value::init(
             self.borrow().data.max(0.0),
@@ -14,6 +15,7 @@ impl Value {
         )
     }
 
+    /// Leaky Rectified Linear Unit
     pub fn leaky_relu(&self) -> Value {
         let x = self.borrow().data;
         Value::init(
@@ -31,6 +33,7 @@ impl Value {
         )
     }
 
+    /// Hyperbolic Tangent
     pub fn tanh(&self) -> Value {
         let e2x = (2.0 * self.borrow().data).exp();
         Value::init(
@@ -45,6 +48,7 @@ impl Value {
         )
     }
 
+    /// Sigmoid
     pub fn sigmoid(&self) -> Value {
         let em1x = (-1.0 * self.borrow().data).exp();
         Value::init(
