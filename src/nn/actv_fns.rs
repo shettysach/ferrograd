@@ -9,3 +9,9 @@ pub fn softmax(y: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
         })
         .collect()
 }
+
+pub fn sigmoid(y: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
+    y.iter()
+        .map(|y_i| y_i.iter().map(|y_ij| y_ij.sigmoid()).collect())
+        .collect()
+}

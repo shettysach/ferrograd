@@ -44,9 +44,41 @@ impl Value {
         })))
     }
 
-    /// Initialise new Value.
+    /// Initialise new Value from a f64.
     pub fn new(data: f64) -> Value {
         Value::init(data, None, Vec::new(), None, Some(String::new()))
+    }
+
+    /// Initialise new 1d vector of Values from a 1d vector of f64.
+    pub fn new_1d(data: &Vec<f64>) -> Vec<Value> {
+        data.iter().map(|float| Value::new(*float)).collect()
+    }
+
+    /// Initialise new 2d vector of Values from a 2d vector of f64.
+    pub fn new_2d(data: &Vec<Vec<f64>>) -> Vec<Vec<Value>> {
+        data.iter().map(|vec| Value::new_1d(vec)).collect()
+    }
+}
+
+impl<T: Into<f64>> From<T> for Value {
+    fn from(t: T) -> Value {
+        Value::new(t.into())
+    }
+}
+
+impl Value {
+    /// Initialise new 1d vector of Values from a 1d vector of `T`,
+    /// where `T` is any value that can be converted to f64.
+    pub fn from_1d<T: Into<f64> + Clone>(data: &Vec<T>) -> Vec<Value> {
+        data.iter().map(|t| Value::from(t.clone())).collect()
+    }
+
+    /// Initialise new 2d vector of Values from a 2d vector of `T`,
+    /// where `T` is any value that can be converted to f64.
+    pub fn from_2d<T: Into<f64> + Clone>(
+        data: &Vec<Vec<T>>,
+    ) -> Vec<Vec<Value>> {
+        data.iter().map(|t| Value::from_1d(&t)).collect()
     }
 }
 

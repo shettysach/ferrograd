@@ -1,10 +1,10 @@
 use ferrograd::{
     engine::{Activation, Value},
-    loss::{softmax, CrossEntropyLoss},
+    loss::CrossEntropyLoss,
     metrics::BinaryAccuracy,
     nn::{
         optim::{l2_regularization, Adam},
-        MultiLayerPerceptron,
+        softmax, MultiLayerPerceptron,
     },
 };
 
@@ -36,20 +36,11 @@ fn main() {
         let start = b * batch_size;
         let end = (b + 1) * batch_size;
 
-        let xtrain: Vec<Vec<Value>> = mnist.train_data[start..end]
-            .iter()
-            .map(|img| {
-                img.iter()
-                    .map(|pix| Value::new(*pix as f64 / 255.0))
-                    .collect()
-            })
-            .collect();
-        let ytrain: Vec<Vec<Value>> = mnist.train_labels[start..end]
-            .iter()
-            .map(|label| one_hot(*label))
-            .collect();
+        let xtrain = images_to_features(&mnist.train_data[start..end]);
+        let ytrain = one_hot_encode(&mnist.train_labels[start..end]);
 
-        let ypred = softmax(&model.forward(&xtrain));
+        let ypred = model.forward(&xtrain);
+        let ypred = softmax(&ypred);
 
         let data_loss = loss.loss(&ypred, &ytrain);
         let reg_loss = l2_regularization(0.0001, model.parameters());
@@ -112,19 +103,37 @@ fn main() {
     println!("Correct predictions: {}/{}", correct, test_samples);
 }
 
-fn one_hot(digit: u8) -> Vec<Value> {
-    let vec = match digit {
-        0 => vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        1 => vec![0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-        2 => vec![0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        3 => vec![0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        4 => vec![0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-        5 => vec![0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-        6 => vec![0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-        7 => vec![0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-        8 => vec![0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-        9 => vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        _ => panic!("Invalid digit"),
-    };
-    vec.iter().map(|v| Value::new(*v as f64)).collect()
+// --- Data transformation ---
+
+fn images_to_features(imgvec: &[[u8; 784]]) -> Vec<Vec<Value>> {
+    imgvec
+        .iter()
+        .map(|img| {
+            img.iter()
+                .map(|pix| Value::new(*pix as f64 / 255.0))
+                .collect()
+        })
+        .collect()
+}
+
+fn one_hot_encode(labels: &[u8]) -> Vec<Vec<Value>> {
+    labels
+        .iter()
+        .map(|digit| {
+            let vec = match digit {
+                0 => vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                1 => vec![0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+                2 => vec![0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                3 => vec![0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                4 => vec![0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                5 => vec![0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                6 => vec![0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                7 => vec![0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                8 => vec![0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                9 => vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                _ => panic!("Invalid digit"),
+            };
+            Value::from_1d(&vec)
+        })
+        .collect()
 }

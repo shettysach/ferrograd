@@ -50,11 +50,11 @@ impl Adam {
                 *m_t = self.beta1 * *m_t + (1.0 - self.beta1) * grad;
                 *v_t = self.beta2 * *v_t + (1.0 - self.beta2) * grad * grad;
 
-                let mc_t = *m_t / (1.0 - self.beta1.powi(self.t as i32));
-                let vc_t = *v_t / (1.0 - self.beta2.powi(self.t as i32));
+                let m_hat = *m_t / (1.0 - self.beta1.powi(self.t as i32));
+                let v_hat = *v_t / (1.0 - self.beta2.powi(self.t as i32));
 
                 param.borrow_mut().data -=
-                    self.lr * mc_t / (vc_t.sqrt() + self.epsilon);
+                    self.lr * m_hat / (v_hat.sqrt() + self.epsilon);
             })
     }
 

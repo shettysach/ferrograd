@@ -4,7 +4,7 @@ use ferrograd::{
     metrics::BinaryAccuracy,
     nn::{
         optim::{l2_regularization, Adam},
-        MultiLayerPerceptron,
+        sigmoid, MultiLayerPerceptron,
     },
     utils::read_csv,
 };
@@ -26,6 +26,7 @@ fn main() {
 
     (0..100).for_each(|k| {
         let ypred = model.forward(&xs);
+        let ypred = sigmoid(&ypred);
 
         let data_loss = loss.loss(&ypred, &ys);
         let reg_loss = l2_regularization(0.0001, model.parameters());

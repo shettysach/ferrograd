@@ -1,8 +1,6 @@
 use ferrograd::{
     engine::{Activation, Value},
-    loss::softmax,
-    nn::MultiLayerPerceptron,
-    utils::print_mnist_image,
+    nn::{softmax, MultiLayerPerceptron},
 };
 use rand::Rng;
 
@@ -21,22 +19,18 @@ fn main() {
     };
 
     // Loading test data
-    let test_samples = 100;
+    let test_samples = 10;
     let offset = rand::thread_rng().gen_range(0..9_900);
 
-    let xtest: Vec<Vec<Value>> = mnist.test_data[offset..offset + test_samples]
-        .iter()
-        .map(|img| {
-            img.iter()
-                .map(|pix| Value::new(*pix as f64 / 255.0))
-                .collect()
-        })
-        .collect();
+    let xtest: Vec<Vec<Value>> =
+        images_to_features(&mnist.test_data[offset..offset + test_samples]);
 
     // Making predictions
     let mut correct = 0;
     xtest.iter().enumerate().for_each(|(i, x)| {
-        let ypred = softmax(&vec![model.forw(&x)]);
+        let ypred = vec![model.forw(&x)];
+        let ypred = softmax(&ypred);
+
         let (argmax, prob) = ypred[0]
             .iter()
             .enumerate()
@@ -61,4 +55,30 @@ fn main() {
     });
 
     println!("Correct predictions: {}/{}", correct, test_samples);
+}
+
+// --- Helper functions ---
+
+fn images_to_features(imgvec: &[[u8; 784]]) -> Vec<Vec<Value>> {
+    imgvec
+        .iter()
+        .map(|img| {
+            img.iter()
+                .map(|pix| Value::new(*pix as f64 / 255.0))
+                .collect()
+        })
+        .collect()
+}
+
+fn print_mnist_image(image: &[u8; 28 * 28]) {
+    for row in 0..28 {
+        for col in 0..28 {
+            if image[row * 28 + col] == 0 {
+                print!("□ ");
+            } else {
+                print!("■ ");
+            }
+        }
+        println!();
+    }
 }

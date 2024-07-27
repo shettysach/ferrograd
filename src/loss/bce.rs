@@ -22,9 +22,8 @@ impl BinaryCrossEntropyLoss {
                     .iter()
                     .zip(ytrue_i)
                     .map(|(ypred_j, ytrue_j)| {
-                        let yp_sigmoid = ypred_j.sigmoid();
-                        (ytrue_j * yp_sigmoid.ln())
-                            + (1.0 - ytrue_j) * (1.0 - yp_sigmoid).ln()
+                        (ytrue_j * ypred_j.ln())
+                            + (1.0 - ytrue_j) * (1.0 - ypred_j).ln()
                     })
                     .sum::<Value>()
             })

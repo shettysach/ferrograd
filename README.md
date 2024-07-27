@@ -1,6 +1,6 @@
 ### ferrograd
 
-- A small autograd engine, inspired from [karpathy/micrograd](https://github.com/karpathy/micrograd), with a more features, such as additional activation functions, optimizers, loss criterions, accuracy metrics, and the ability to save and load model weights after training.
+- A small autograd engine, inspired from [karpathy/micrograd](https://github.com/karpathy/micrograd), with more features, such as additional activation functions, optimizers, loss criterions, accuracy metrics, and the ability to save and load model weights after training.
 - Created for learning purposes. See `notes` directory. 
 - Capable of creating neurons, dense layers and multilayer perceptrons, for non-linear classification tasks.
 
@@ -8,6 +8,10 @@
 > - To run the MNIST example, download the [data](https://yann.lecun.com/exdb/mnist/), gzip extract all 4 files, and move them to the directory `/data/mnist/`.  
 > - Not optimized for performance and uses scalar values (`Value`) and operations. `Vec<Value>` and `Vec<Vec<Value>>` are used in place of tensors.
 > - Run examples with the `release` flag (`cargo run --release --example <example>`) for more optimized performance.
+
+```zsh
+cargo add --git https://github.com/shettysach/ferrograd.git ferrograd
+```
 
 #### Examples
 
@@ -66,12 +70,10 @@ use ferrograd::{
 };
 
 fn main() {
-    let n = Neuron::new(2, Some(Activation::ReLU)).name_params();
+    let n = Neuron::new(2, Some(Activation::ReLU));
+    let n = n.name_params();
 
-    let x = vec![
-        vec![Value::new(-2.0)], // x0
-        vec![Value::new(1.0)],  // x1
-    ];
+    let x = Value::new_2d(&vec![vec![2.0, 1.0]]);
     let x = n.name_inputs(x);
 
     println!("{}\n", n);
@@ -118,14 +120,12 @@ ReLU data = 1.800, grad = 1.000
 
 ---
 
-##### MNIST dataset
+##### MNIST
 
 ```rust
 use ferrograd::{
     engine::{Activation, Value},
-    loss::softmax,
-    nn::MultiLayerPerceptron,
-    utils::print_mnist_image,
+    nn::{softmax, MultiLayerPerceptron},
 };
 use rand::Rng;
 
@@ -147,19 +147,15 @@ fn main() {
     let test_samples = 100;
     let offset = rand::thread_rng().gen_range(0..9_900);
 
-    let xtest: Vec<Vec<Value>> = mnist.test_data[offset..offset + test_samples]
-        .iter()
-        .map(|img| {
-            img.iter()
-                .map(|pix| Value::new(*pix as f64 / 255.0))
-                .collect()
-        })
-        .collect();
+    let xtest: Vec<Vec<Value>> =
+        images_to_features(&mnist.test_data[offset..offset + test_samples]);
 
     // Making predictions
     let mut correct = 0;
     xtest.iter().enumerate().for_each(|(i, x)| {
-        let ypred = softmax(&vec![model.forw(&x)]);
+        let ypred = vec![model.forw(&x)];
+        let ypred = softmax(&ypred);
+
         let (argmax, prob) = ypred[0]
             .iter()
             .enumerate()
@@ -185,6 +181,8 @@ fn main() {
 
     println!("Correct predictions: {}/{}", correct, test_samples);
 }
+
+// --- Helper functions ---
 ```
 
 ```console
@@ -194,39 +192,39 @@ cargo run --example test_mnist
 ```
 # ...
 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ ■ ■ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □
-□ □ □ □ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □
-□ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □
-□ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ □ □ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-ytrue: 3
-ypred: 3
-prob: 0.942
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ ■ □ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ 
+□ □ □ □ □ ■ ■ ■ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ 
+□ □ □ □ □ ■ ■ ■ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ ■ ■ ■ ■ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
+ytrue: 5
+ypred: 5
+prob: 0.822
 pred: true
-
+                                                        
 # ...
 ```
 

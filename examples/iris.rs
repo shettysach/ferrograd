@@ -1,10 +1,10 @@
 use ferrograd::{
     engine::{Activation, Value},
-    loss::{softmax, CrossEntropyLoss},
+    loss::CrossEntropyLoss,
     metrics::BinaryAccuracy,
     nn::{
         optim::{l2_regularization, Adam},
-        MultiLayerPerceptron,
+        softmax, MultiLayerPerceptron,
     },
 };
 

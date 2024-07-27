@@ -4,12 +4,10 @@ use ferrograd::{
 };
 
 fn main() {
-    let n = Neuron::new(2, Some(Activation::ReLU)).name_params();
+    let n = Neuron::new(2, Some(Activation::ReLU));
+    let n = n.name_params();
 
-    let x = vec![vec![
-        Value::new(2.0), // x0
-        Value::new(1.0), // x1
-    ]];
+    let x = Value::new_2d(&vec![vec![2.0, 1.0]]);
     let x = n.name_inputs(x);
 
     println!("{}\n", n);

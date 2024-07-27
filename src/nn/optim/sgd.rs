@@ -26,8 +26,8 @@ impl SGD {
     pub fn step(&mut self) {
         self.params.iter().zip(self.velocities.iter_mut()).for_each(
             |(param, velocity)| {
-                *velocity =
-                    self.momentum * *velocity + self.lr * param.borrow().grad;
+                (*velocity) =
+                    self.momentum * (*velocity) + self.lr * param.borrow().grad;
                 param.borrow_mut().data -= *velocity;
             },
         )
