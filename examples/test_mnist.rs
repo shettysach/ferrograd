@@ -19,7 +19,7 @@ fn main() {
     };
 
     // Loading test data
-    let test_samples = 10;
+    let test_samples = 100;
     let offset = rand::thread_rng().gen_range(0..9_900);
 
     let xtest: Vec<Vec<Value>> =

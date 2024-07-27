@@ -1,15 +1,10 @@
 ### ferrograd
 
 - A small autograd engine, inspired from [karpathy/micrograd](https://github.com/karpathy/micrograd), with more features, such as additional activation functions, optimizers, loss criterions, accuracy metrics, and the ability to save and load model weights after training.
-- Created for learning purposes. See `notes` directory. 
 - Capable of creating neurons, dense layers and multilayer perceptrons, for non-linear classification tasks.
+- Created for learning purposes. See `notes` directory. 
 
-> NOTE: 
-> - To run the MNIST example, download the [data](https://yann.lecun.com/exdb/mnist/), gzip extract all 4 files, and move them to the directory `/data/mnist/`.  
-> - Not optimized for performance and uses scalar values (`Value`) and operations. `Vec<Value>` and `Vec<Vec<Value>>` are used in place of tensors.
-> - Run examples with the `release` flag (`cargo run --release --example <example>`) for more optimized performance.
-
-```zsh
+```console
 cargo add --git https://github.com/shettysach/ferrograd.git ferrograd
 ```
 
@@ -121,6 +116,8 @@ ReLU data = 1.800, grad = 1.000
 ---
 
 ##### MNIST
+
+> __NOTE:__ To run the MNIST examples, download the [data](https://yann.lecun.com/exdb/mnist/), gzip extract all 4 files, and move them to the directory `/data/mnist/`.  
 
 ```rust
 use ferrograd::{
@@ -328,8 +325,35 @@ ASCII contour graph -
 □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■
 ```
 
+---
+
+```
+Optimizers
+├ Adam
+├ RMSprop
+└ SGD with momentum
+
+Loss criterions
+├ Cross Entropy
+├ Binary Cross Entropy
+└ Hinge
+
+Activation functions
+├ ReLU
+├ Leaky ReLU
+├ Softmax
+├ Sigmoid
+└ Tanh
+
+Accuracy metrics
+└ Binary accuracy
+```
+
+> NOTE: 
+> - Not optimized for performance and uses scalar values (`Value`) and operations. `Vec<Value>` and `Vec<Vec<Value>>` are used in place of tensors.
+> - Run examples with the `release` flag (`cargo run --release --example <example>`) for more optimized performance.
+
 > TODO:
-> - AdamW, AdaGrad, RMSProp
 > - Some performance optimisations
 > - Documentation and notes
 
