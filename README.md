@@ -2,7 +2,7 @@
 
 - A small autograd engine, inspired from [karpathy/micrograd](https://github.com/karpathy/micrograd), with more features, such as additional activation functions, optimizers, loss criterions, accuracy metrics, and the ability to save and load model weights after training.
 - Capable of creating neurons, dense layers and multilayer perceptrons, for non-linear classification tasks.
-- Created for learning purposes. See `notes` directory. 
+- Created for learning purposes. See `notes` directory.
 
 ```console
 cargo add --git https://github.com/shettysach/ferrograd.git ferrograd
@@ -16,27 +16,26 @@ cargo add --git https://github.com/shettysach/ferrograd.git ferrograd
 use ferrograd::engine::Value;
 
 fn main() {
-    let a = Value::new(-4.).with_name("a");
-    let b = Value::new(2.).with_name("b");
+    let a = Value::new(-4.);
+    let b = Value::new(2.);
 
-    let mut c = (&a + &b).with_name("c");
-    let mut d = (&a * &b + &b.pow(3.)).with_name("d");
+    let mut c = &a + &b;
+    let mut d = &a * &b + &b.pow(3.);
 
     c += &c + 1.;
     c += 1. + &c + (-&a);
     d += &d * 2. + (&b + &a).relu();
     d += 3. * &d + (&b - &a).relu();
 
-    let e = (&c - &d).with_name("e");
-    let f = e.pow(2.).with_name("f");
+    let e = &c - &d;
+    let f = e.pow(2.);
 
-    let mut g = (&f / 2.).with_name("g");
+    let mut g = &f / 2.;
     g += 10. / &f;
 
-    g.backward();
-    println!("{}", g.tree());
-
     println!("g.data = {:.4}", g.borrow().data);
+    g.backward();
+
     println!("a.grad = {:.4}", a.borrow().grad);
     println!("b.grad = {:.4}", b.borrow().grad);
 }
@@ -52,6 +51,54 @@ cargo run --example readme
 g.data = 24.7041
 a.grad = 138.8338
 b.grad = 645.5773
+```
+
+---
+
+##### Expression tree
+
+```rust
+use ferrograd::engine::Value;
+
+fn main() {
+    let a = Value::new(5.6).with_name("a");
+    let b = Value::new(10.8).with_name("b");
+
+    let c = Value::new(-15.12).with_name("c");
+    let d = Value::new(2.5).with_name("d");
+
+    let e = (&a + &b) / 50.0;
+    let e = e.with_name("e");
+
+    let f = (&d - &c) * 5.5625;
+    let f = f.with_name("f");
+
+    let g = (e * f).leaky_relu().with_name("g");
+    g.backward();
+
+    println!("{}", g.tree());
+}
+```
+
+```console
+cargo run --example tree
+```
+
+```
+LeakyReLU data = 32.148, grad = 1.000 ← g
+└── * data = 32.148, grad = 1.000
+    ├── * data = 0.328, grad = 98.011 ← e
+    │   ├── + data = 16.400, grad = 1.960
+    │   │   ├── data = 5.600, grad = 1.960 ← a
+    │   │   └── data = 10.800, grad = 1.960 ← b
+    │   └── 0.020
+    └── * data = 98.011, grad = 0.328 ← f
+        ├── + data = 17.620, grad = 1.824
+        │   ├── data = 2.500, grad = 1.824 ← d
+        │   └── * data = 15.120, grad = 1.824
+        │       ├── data = -15.120, grad = -1.824 ← c
+        │       └── -1.000
+        └── 5.562
 ```
 
 ---
@@ -117,7 +164,7 @@ ReLU data = 1.800, grad = 1.000
 
 ##### MNIST
 
-> __NOTE:__ To run the MNIST examples, download the [data](https://yann.lecun.com/exdb/mnist/), gzip extract all 4 files, and move them to the directory `/data/mnist/`.  
+> **NOTE:** To run the MNIST examples, download the [data](https://yann.lecun.com/exdb/mnist/), gzip extract all 4 files, and move them to the directory `/data/mnist/`.
 
 ```rust
 use ferrograd::{
@@ -189,39 +236,39 @@ cargo run --example test_mnist
 ```
 # ...
 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ ■ □ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ 
-□ □ □ □ □ ■ ■ ■ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ 
-□ □ □ □ □ ■ ■ ■ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ ■ ■ ■ ■ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □
+□ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ ■ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
+□ □ □ □ □ ■ ■ ■ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
+□ □ □ □ □ ■ ■ ■ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
+□ □ □ □ □ ■ ■ ■ ■ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
+□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
 ytrue: 5
 ypred: 5
 prob: 0.822
 pred: true
-                                                        
+
 # ...
 ```
 
@@ -334,28 +381,30 @@ Optimizers
 └ SGD with momentum
 
 Loss criterions
-├ Cross Entropy
-├ Binary Cross Entropy
+├ Binary Cross-Entropy
+├ Cross-Entropy
 └ Hinge
 
 Activation functions
-├ ReLU
 ├ Leaky ReLU
-├ Softmax
+├ ReLU
 ├ Sigmoid
+├ Softmax
 └ Tanh
 
 Accuracy metrics
 └ Binary accuracy
 ```
 
-> NOTE: 
+> NOTE:
+>
 > - Not optimized for performance and uses scalar values (`Value`) and operations. `Vec<Value>` and `Vec<Vec<Value>>` are used in place of tensors.
 > - Run examples with the `release` flag (`cargo run --release --example <example>`) for more optimized performance.
 
 > TODO:
+>
 > - Some performance optimisations
-> - Documentation and notes
+> - Documentation
 
 ###### Credits
 

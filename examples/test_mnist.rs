@@ -71,14 +71,14 @@ fn images_to_features(imgvec: &[[u8; 784]]) -> Vec<Vec<Value>> {
 }
 
 fn print_mnist_image(image: &[u8; 28 * 28]) {
-    for row in 0..28 {
-        for col in 0..28 {
+    (0..28).into_iter().for_each(|row| {
+        (0..28).into_iter().for_each(|col| {
             if image[row * 28 + col] == 0 {
                 print!("□ ");
             } else {
                 print!("■ ");
             }
-        }
+        });
         println!();
-    }
+    });
 }

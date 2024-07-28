@@ -53,7 +53,7 @@ fn main() {
 // -- Grid --
 
 fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
-    println!("\nASCII contour graph - \n■ > 0.0  \n□ <= 0.0 ");
+    println!("\nASCII contour graph - \n■ > 0.5  \n□ <= 0.5 ");
     (-bound..bound).for_each(|y| {
         (-bound..bound).for_each(|x| {
             let k = &model.forward(&vec![vec![
@@ -61,7 +61,7 @@ fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
                 Value::new(-y as f64 / bound as f64 * 2.0),
             ]])[0][0];
 
-            if k.borrow().data > 0.0 {
+            if k.borrow().data > 0.5 {
                 print!("■ ");
             } else {
                 print!("□ ");
