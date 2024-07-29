@@ -26,33 +26,33 @@ fn main() {
         images_to_features(&mnist.test_data[offset..offset + test_samples]);
 
     // Making predictions
-    let mut correct = 0;
-    xtest.iter().enumerate().for_each(|(i, x)| {
-        let ypred = vec![model.forw(&x)];
-        let ypred = softmax(&ypred);
+    let correct = xtest
+        .iter()
+        .enumerate()
+        .filter(|(i, x)| {
+            let ypred = vec![model.forw(x)];
+            let ypred = softmax(&ypred);
 
-        let (argmax, prob) = ypred[0]
-            .iter()
-            .enumerate()
-            .max_by_key(|(_, v)| *v)
-            .map(|(ind, v)| (ind, v.borrow().data))
-            .expect("Error  in prediction");
+            let (argmax, prob) = ypred[0]
+                .iter()
+                .enumerate()
+                .max_by_key(|(_, v)| *v)
+                .map(|(ind, v)| (ind, v.borrow().data))
+                .expect("Error  in prediction");
 
-        let img = &mnist.test_data[offset + i];
-        let label = mnist.test_labels[offset + i];
+            let img = &mnist.test_data[offset + i];
+            let label = mnist.test_labels[offset + i];
+            let pred = label as usize == argmax;
 
-        let pred = label as usize == argmax;
+            print_mnist_image(img);
+            println!("ytrue: {}", label);
+            println!("ypred: {argmax}");
+            println!("prob: {prob:.3}");
+            println!("pred: {pred}\n");
 
-        if label as usize == argmax {
-            correct += 1
-        }
-
-        print_mnist_image(img);
-        println!("ytrue: {}", label);
-        println!("ypred: {argmax}");
-        println!("prob: {prob:.3}");
-        println!("pred: {pred}\n");
-    });
+            pred
+        })
+        .count();
 
     println!("Correct predictions: {}/{}", correct, test_samples);
 }
@@ -71,8 +71,8 @@ fn images_to_features(imgvec: &[[u8; 784]]) -> Vec<Vec<Value>> {
 }
 
 fn print_mnist_image(image: &[u8; 28 * 28]) {
-    (0..28).into_iter().for_each(|row| {
-        (0..28).into_iter().for_each(|col| {
+    (0..28).for_each(|row| {
+        (0..28).for_each(|col| {
             if image[row * 28 + col] == 0 {
                 print!("□ ");
             } else {

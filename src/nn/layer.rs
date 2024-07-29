@@ -16,13 +16,13 @@ impl Layer {
     }
 
     /// Forward a single 1d input x through the Layer.
-    pub fn forw(&self, x: &Vec<Value>) -> Vec<Value> {
+    pub fn forw(&self, x: &[Value]) -> Vec<Value> {
         self.neurons.iter().map(|n| n.forw(x)).collect()
     }
 
     /// Forward pass of 2d input x through the Layer.
-    pub fn forward(&self, x: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
-        x.iter().map(|xrow| self.forw(&xrow)).collect()
+    pub fn forward(&self, x: &[&[Value]]) -> Vec<Vec<Value>> {
+        x.iter().map(|xrow| self.forw(xrow)).collect()
     }
 
     /// Returns 1d vector of weights and biases of the Neurons of the Layer.
@@ -33,7 +33,7 @@ impl Layer {
 
 impl fmt::Display for Layer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.neurons.iter().next() {
+        match self.neurons.first() {
             Some(neuron) => {
                 write!(f, "{} → {}", neuron, self.neurons.len())
             }

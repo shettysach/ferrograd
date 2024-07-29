@@ -84,21 +84,23 @@ fn main() {
     // Making predictions
     println!("Testing");
     let ypred = softmax(&model.forward(&xtest));
-    let mut correct = 0;
 
-    for i in 0..test_samples {
-        let (argmax, _) = ypred[i]
-            .iter()
-            .enumerate()
-            .max_by_key(|(_, v)| *v)
-            .map(|(ind, v)| (ind, v.borrow().data))
-            .expect("Error  in prediction");
+    let correct = ypred
+        .iter()
+        .enumerate()
+        .take(test_samples)
+        .filter(|(i, ypred_i)| {
+            let (argmax, _) = ypred_i
+                .iter()
+                .enumerate()
+                .max_by_key(|(_, v)| *v)
+                .map(|(ind, v)| (ind, v.borrow().data))
+                .expect("Error  in prediction");
 
-        let label = mnist.test_labels[i];
-        if label as usize == argmax {
-            correct += 1
-        }
-    }
+            let label = mnist.test_labels[*i];
+            label as usize == argmax
+        })
+        .count();
 
     println!("Correct predictions: {}/{}", correct, test_samples);
 }

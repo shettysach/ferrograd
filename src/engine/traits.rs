@@ -1,11 +1,17 @@
 use crate::engine::value::{Activation, Operation, Value};
 use std::{cmp::Ordering, fmt, hash::Hash};
 
+// -- Hash --
+
 impl Hash for Value {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.borrow()._uuid.hash(state);
     }
 }
+
+// -- Eq --
+
+impl Eq for Value {}
 
 impl PartialEq for Value {
     fn eq(&self, other: &Value) -> bool {
@@ -13,19 +19,24 @@ impl PartialEq for Value {
     }
 }
 
-impl Eq for Value {}
-
-impl PartialOrd for Value {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.borrow().data.partial_cmp(&other.borrow().data)
-    }
-}
+// -- Ord --
 
 impl Ord for Value {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).expect("Error in comparing f64s")
+    fn cmp(&self, other: &Value) -> Ordering {
+        self.borrow()
+            .data
+            .partial_cmp(&other.borrow().data)
+            .expect("Error in comparing f64s")
     }
 }
+
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Value) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+// -- Debug and Display --
 
 impl fmt::Debug for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -13,20 +13,16 @@ impl BinaryAccuracy {
     }
 
     /// Compute accuracy.
-    pub fn compute(
-        &self,
-        ypred: &Vec<Vec<Value>>,
-        ys: &Vec<Vec<Value>>,
-    ) -> f64 {
+    pub fn compute(&self, ypred: &[Vec<Value>], ytrue: &[Vec<Value>]) -> f64 {
         ypred
             .iter()
-            .zip(ys)
-            .map(|(ypred_i, ys_i)| {
+            .zip(ytrue)
+            .map(|(ypred_i, ytrue_i)| {
                 ypred_i
                     .iter()
-                    .zip(ys_i.iter())
-                    .filter(|&(ypred_j, ys_j)| {
-                        (ys_j.borrow().data > self.threshold)
+                    .zip(ytrue_i.iter())
+                    .filter(|&(ypred_j, ytrue_j)| {
+                        (ytrue_j.borrow().data > self.threshold)
                             == (ypred_j.borrow().data > self.threshold)
                     })
                     .count()

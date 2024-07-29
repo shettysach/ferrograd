@@ -10,11 +10,7 @@ impl MeanSquareErrorLoss {
         MeanSquareErrorLoss {}
     }
 
-    pub fn loss(
-        &self,
-        ypred: &Vec<Vec<Value>>,
-        ytrue: &Vec<Vec<Value>>,
-    ) -> Value {
+    pub fn loss(&self, ypred: &[Vec<Value>], ytrue: &[Vec<Value>]) -> Value {
         ypred
             .iter()
             .zip(ytrue)
@@ -28,5 +24,11 @@ impl MeanSquareErrorLoss {
             })
             .sum::<Value>()
             / ypred.len() as f64
+    }
+}
+
+impl Default for MeanSquareErrorLoss {
+    fn default() -> Self {
+        Self::new()
     }
 }

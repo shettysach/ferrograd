@@ -56,7 +56,7 @@ fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
     println!("\nASCII contour graph - \n■ > 0.0  \n□ <= 0.0 ");
     (-bound..bound).for_each(|y| {
         (-bound..bound).for_each(|x| {
-            let k = &model.forward(&vec![vec![
+            let k = &model.forward(&[vec![
                 Value::new(x as f64 / bound as f64 * 2.0),
                 Value::new(-y as f64 / bound as f64 * 2.0),
             ]])[0][0];

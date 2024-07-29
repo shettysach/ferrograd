@@ -8,13 +8,13 @@ impl Value {
         let mut topo: Vec<Value> = vec![];
         let mut visited: HashSet<Value> = HashSet::new();
 
-        self.topological_sort(&mut topo, &mut visited);
+        self._topological_sort(&mut topo, &mut visited);
         topo.reverse();
 
         // ∂z/∂z = 1
         self.borrow_mut().grad = 1.0;
 
-        // Backpropagation through the DAG
+        // Backpropagation through the computation graph.
         topo.iter().for_each(|v| {
             if let Some(backprop) = v.borrow()._backward {
                 backprop(&v.borrow());
@@ -23,14 +23,14 @@ impl Value {
     }
 
     // Topological sort for order.
-    fn topological_sort(
+    fn _topological_sort(
         &self,
         topo: &mut Vec<Value>,
         visited: &mut HashSet<Value>,
     ) {
         if visited.insert(self.clone()) {
             self.borrow()._prev.iter().for_each(|child| {
-                child.topological_sort(topo, visited);
+                child._topological_sort(topo, visited);
             });
 
             topo.push(self.clone());

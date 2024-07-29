@@ -10,11 +10,7 @@ impl BinaryCrossEntropyLoss {
         BinaryCrossEntropyLoss
     }
 
-    pub fn loss(
-        &self,
-        ypred: &Vec<Vec<Value>>,
-        ytrue: &Vec<Vec<Value>>,
-    ) -> Value {
+    pub fn loss(&self, ypred: &[Vec<Value>], ytrue: &[Vec<Value>]) -> Value {
         -ypred
             .iter()
             .zip(ytrue)
@@ -30,5 +26,11 @@ impl BinaryCrossEntropyLoss {
             })
             .sum::<Value>()
             / (ypred.len() * ypred[0].len()) as f64
+    }
+}
+
+impl Default for BinaryCrossEntropyLoss {
+    fn default() -> Self {
+        Self::new()
     }
 }

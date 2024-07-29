@@ -10,11 +10,7 @@ impl CrossEntropyLoss {
         CrossEntropyLoss
     }
 
-    pub fn loss(
-        &self,
-        ypred: &Vec<Vec<Value>>,
-        ytrue: &Vec<Vec<Value>>,
-    ) -> Value {
+    pub fn loss(&self, ypred: &[Vec<Value>], ytrue: &[Vec<Value>]) -> Value {
         -ypred
             .iter()
             .zip(ytrue)
@@ -27,5 +23,11 @@ impl CrossEntropyLoss {
             })
             .sum::<Value>()
             / (ypred.len() * ypred[0].len()) as f64
+    }
+}
+
+impl Default for CrossEntropyLoss {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -23,7 +23,7 @@ impl Neuron {
     }
 
     /// Forward pass of a single 1d input x through the Neuron.
-    pub fn forw(&self, x: &Vec<Value>) -> Value {
+    pub fn forw(&self, x: &[Value]) -> Value {
         let act = self
             .w
             .iter()
@@ -42,7 +42,7 @@ impl Neuron {
     }
 
     /// Forward pass of 2d input x through the Neuron.
-    pub fn forward(&self, x: &Vec<Vec<Value>>) -> Vec<Value> {
+    pub fn forward(&self, x: &[Vec<Value>]) -> Vec<Value> {
         x.iter().map(|x_i| self.forw(x_i)).collect()
     }
 

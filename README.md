@@ -398,13 +398,10 @@ Accuracy metrics
 
 > NOTE:
 >
-> - Not optimized for performance and uses scalar values (`Value`) and operations. `Vec<Value>` and `Vec<Vec<Value>>` are used in place of tensors.
+> - Created for educational purposes and not optimized for performance.
+>   - Uses scalar values (`Value`) and operations. `Vec<Value>` and `Vec<Vec<Value>>` are used in place of tensors.
+>   - Negation and subtraction invole multiplication with -1 and division involves raising to the power -1, similar to how it's implemented in micrograd.
 > - Run examples with the `release` flag (`cargo run --release --example <example>`) for more optimized performance.
-
-> TODO:
->
-> - Some performance optimisations
-> - Documentation
 
 ###### Credits
 

@@ -1,7 +1,7 @@
 use crate::engine::Value;
 
 /// Apply softmax on each 1d vec of Values in a 2d vec.
-pub fn softmax(y: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
+pub fn softmax(y: &[Vec<Value>]) -> Vec<Vec<Value>> {
     y.iter()
         .map(|y_i| {
             let exp_yi = y_i.iter().map(|y_ij| y_ij.exp());
@@ -12,7 +12,7 @@ pub fn softmax(y: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
 }
 
 /// Apply sigmoid on each Value in a 2d vec.
-pub fn sigmoid(y: &Vec<Vec<Value>>) -> Vec<Vec<Value>> {
+pub fn sigmoid(y: &[Vec<Value>]) -> Vec<Vec<Value>> {
     y.iter()
         .map(|y_i| y_i.iter().map(|y_ij| y_ij.sigmoid()).collect())
         .collect()

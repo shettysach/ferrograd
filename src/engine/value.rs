@@ -50,12 +50,12 @@ impl Value {
     }
 
     /// Initialise new 1d vector of Values from a 1d vector of f64.
-    pub fn new_1d(data: &Vec<f64>) -> Vec<Value> {
+    pub fn new_1d(data: &[f64]) -> Vec<Value> {
         data.iter().map(|float| Value::new(*float)).collect()
     }
 
     /// Initialise new 2d vector of Values from a 2d vector of f64.
-    pub fn new_2d(data: &Vec<Vec<f64>>) -> Vec<Vec<Value>> {
+    pub fn new_2d(data: &[Vec<f64>]) -> Vec<Vec<Value>> {
         data.iter().map(|vec| Value::new_1d(vec)).collect()
     }
 }
@@ -67,18 +67,16 @@ impl<T: Into<f64>> From<T> for Value {
 }
 
 impl Value {
-    /// Initialise new 1d vector of Values from a 1d vector of `T`,
+    /// Initialise new 1d vector of Values from a 1d vector of type `T`,
     /// where `T` is any value that can be converted to f64.
-    pub fn from_1d<T: Into<f64> + Clone>(data: &Vec<T>) -> Vec<Value> {
+    pub fn from_1d<T: Into<f64> + Clone>(data: &[T]) -> Vec<Value> {
         data.iter().map(|t| Value::from(t.clone())).collect()
     }
 
-    /// Initialise new 2d vector of Values from a 2d vector of `T`,
+    /// Initialise new 2d vector of Values from a 2d vector of type `T`,
     /// where `T` is any value that can be converted to f64.
-    pub fn from_2d<T: Into<f64> + Clone>(
-        data: &Vec<Vec<T>>,
-    ) -> Vec<Vec<Value>> {
-        data.iter().map(|t| Value::from_1d(&t)).collect()
+    pub fn from_2d<T: Into<f64> + Clone>(data: &[Vec<T>]) -> Vec<Vec<Value>> {
+        data.iter().map(|t| Value::from_1d(t)).collect()
     }
 }
 

@@ -19,7 +19,7 @@ fn add(self: Value, rhs: f64) -> Value {
     Value::init(
         self.borrow().data + rhs,
         Some(add_backward),
-        vec![self.clone(), Value::new_const(rhs)],
+        vec![self.clone(), Value::_new_const(rhs)],
         Some(Operation::Add),
         Some(String::new()),
     )
@@ -30,7 +30,7 @@ fn add(self: f64, rhs: Value) -> Value {
     Value::init(
         self + rhs.borrow().data,
         Some(add_backward),
-        vec![Value::new_const(self), rhs.clone()],
+        vec![Value::_new_const(self), rhs.clone()],
         Some(Operation::Add),
         Some(String::new()),
     )
@@ -59,7 +59,7 @@ fn mul(self: Value, rhs: f64) -> Value {
     Value::init(
         self.borrow().data * rhs,
         Some(mul_backward),
-        vec![self.clone(), Value::new_const(rhs)],
+        vec![self.clone(), Value::_new_const(rhs)],
         Some(Operation::Mul),
         Some(String::new()),
     )
@@ -70,7 +70,7 @@ fn mul(self: f64, rhs: Value) -> Value {
     Value::init(
         self * rhs.borrow().data,
         Some(mul_backward),
-        vec![Value::new_const(self), rhs.clone()],
+        vec![Value::_new_const(self), rhs.clone()],
         Some(Operation::Mul),
         Some(String::new()),
     )
@@ -95,7 +95,7 @@ impl Value {
                 value._prev[0].borrow_mut().grad +=
                     power * base.powf(power - 1.0) * value.grad;
             }),
-            vec![self.clone(), Value::new_const(power)],
+            vec![self.clone(), Value::_new_const(power)],
             Some(Operation::Pow),
             Some(String::new()),
         )
@@ -127,7 +127,7 @@ impl Value {
     }
 
     // For initialising constants
-    fn new_const(data: f64) -> Value {
+    fn _new_const(data: f64) -> Value {
         Value::init(data, None, Vec::new(), None, None)
     }
 }

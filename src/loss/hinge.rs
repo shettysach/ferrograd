@@ -10,11 +10,7 @@ impl HingeLoss {
         HingeLoss
     }
 
-    pub fn loss(
-        &self,
-        ypred: &Vec<Vec<Value>>,
-        ytrue: &Vec<Vec<Value>>,
-    ) -> Value {
+    pub fn loss(&self, ypred: &[Vec<Value>], ytrue: &[Vec<Value>]) -> Value {
         ypred
             .iter()
             .zip(ytrue.iter())
@@ -27,5 +23,11 @@ impl HingeLoss {
             })
             .sum::<Value>()
             / (ypred.len() * ypred[0].len()) as f64
+    }
+}
+
+impl Default for HingeLoss {
+    fn default() -> Self {
+        Self::new()
     }
 }

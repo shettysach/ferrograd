@@ -50,10 +50,7 @@ fn main() {
         vec![7.2, 2.7, 6.0, 2.0],
         vec![5.8, 2.7, 3.9, 1.2],
     ];
-    let x = samples
-        .iter()
-        .map(|vec| vec.iter().map(|f| Value::new(*f)).collect())
-        .collect();
+    let x = Value::new_2d(&samples);
 
     let preds = model.forward(&x);
 
