@@ -6,8 +6,6 @@ use rand::Rng;
 
 fn main() {
     // MLP
-    let mnist = rust_mnist::Mnist::new("data/mnist/");
-
     let model =
         MultiLayerPerceptron::new(784, vec![64, 32, 10], Activation::LeakyReLU);
     println!("{}\n", model);
@@ -22,6 +20,7 @@ fn main() {
     let test_samples = 100;
     let offset = rand::thread_rng().gen_range(0..9_900);
 
+    let mnist = rust_mnist::Mnist::new("data/mnist/");
     let xtest: Vec<Vec<Value>> =
         images_to_features(&mnist.test_data[offset..offset + test_samples]);
 

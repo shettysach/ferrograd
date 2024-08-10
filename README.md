@@ -46,8 +46,6 @@ cargo run --example readme
 ```
 
 ```
-# Printing of g.tree()
-
 g.data = 24.7041
 a.grad = 138.8338
 b.grad = 645.5773
@@ -175,8 +173,6 @@ use rand::Rng;
 
 fn main() {
     // MLP
-    let mnist = rust_mnist::Mnist::new("data/mnist/");
-
     let model =
         MultiLayerPerceptron::new(784, vec![64, 32, 10], Activation::LeakyReLU);
     println!("{}\n", model);
@@ -191,37 +187,38 @@ fn main() {
     let test_samples = 100;
     let offset = rand::thread_rng().gen_range(0..9_900);
 
+    let mnist = rust_mnist::Mnist::new("data/mnist/");
     let xtest: Vec<Vec<Value>> =
         images_to_features(&mnist.test_data[offset..offset + test_samples]);
 
     // Making predictions
-    let mut correct = 0;
-    xtest.iter().enumerate().for_each(|(i, x)| {
-        let ypred = vec![model.forw(&x)];
-        let ypred = softmax(&ypred);
+    let correct = xtest
+        .iter()
+        .enumerate()
+        .filter(|(i, x)| {
+            let ypred = vec![model.forw(x)];
+            let ypred = softmax(&ypred);
 
-        let (argmax, prob) = ypred[0]
-            .iter()
-            .enumerate()
-            .max_by_key(|(_, v)| *v)
-            .map(|(ind, v)| (ind, v.borrow().data))
-            .expect("Error  in prediction");
+            let (argmax, prob) = ypred[0]
+                .iter()
+                .enumerate()
+                .max_by_key(|(_, v)| *v)
+                .map(|(ind, v)| (ind, v.borrow().data))
+                .expect("Error  in prediction");
 
-        let img = &mnist.test_data[offset + i];
-        let label = mnist.test_labels[offset + i];
+            let img = &mnist.test_data[offset + i];
+            let label = mnist.test_labels[offset + i];
+            let pred = label as usize == argmax;
 
-        let pred = label as usize == argmax;
+            print_mnist_image(img);
+            println!("ytrue: {}", label);
+            println!("ypred: {argmax}");
+            println!("prob: {prob:.3}");
+            println!("pred: {pred}\n");
 
-        if label as usize == argmax {
-            correct += 1
-        }
-
-        print_mnist_image(img);
-        println!("ytrue: {}", label);
-        println!("ypred: {argmax}");
-        println!("prob: {prob:.3}");
-        println!("pred: {pred}\n");
-    });
+            pred
+        })
+        .count();
 
     println!("Correct predictions: {}/{}", correct, test_samples);
 }
@@ -233,44 +230,9 @@ fn main() {
 cargo run --example test_mnist
 ```
 
-```
-# ...
-
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □
-□ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ ■ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ ■ ■ ■ □ □ □ □ □ □ □ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □
-□ □ □ □ □ ■ ■ ■ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □
-□ □ □ □ □ ■ ■ ■ ■ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ ■ ■ ■ ■ ■ ■ ■ ■ ■ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-□ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □ □
-ytrue: 5
-ypred: 5
-prob: 0.822
-pred: true
-
-# ...
-```
+<div "align: center;">
+    <img src="mnist.gif" width="55%">
+</div>
 
 ---
 
@@ -289,18 +251,23 @@ use ferrograd::{
 };
 
 fn main() {
-    let (xs, ys) = read_csv("data/moons_data.csv", 2, 1, 1);
+    let (xs, ys) = read_csv("data/moons_data.csv", &[0, 1], &[2], 1);
 
     let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::ReLU);
-    println!("Model - \n{}", model);
-    println!("Number of parameters = {}\n", model.parameters().len());
+    println!("{}", model);
+    println!("Number of parameters: {}\n", model.parameters().len());
 
     let mut optim = SGD::new(model.parameters(), 0.1, 0.9);
     let loss = HingeLoss::new();
     let accuracy = BinaryAccuracy::new(0.0);
 
+    println!(
+        "Optimiser: {:#?}\n\nCriterion: {:#?}\n\nMetric: {:#?}\n",
+        optim, loss, accuracy
+    );
+
     (0..100).for_each(|k| {
-        let ypred: Vec<Vec<Value>> = model.forward(&xs);
+        let ypred = model.forward(&xs);
 
         let data_loss = loss.loss(&ypred, &ys);
         let reg_loss = l2_regularization(0.0001, model.parameters());
@@ -320,6 +287,7 @@ fn main() {
         );
     });
 
+    println!();
     print_grid(&model, 15);
 }
 
@@ -400,7 +368,7 @@ Accuracy metrics
 >
 > - Created for educational purposes and not optimized for performance.
 >   - Uses scalar values (`Value`) and operations. `Vec<Value>` and `Vec<Vec<Value>>` are used in place of tensors.
->   - Negation and subtraction invole multiplication with -1 and division involves raising to the power -1, similar to how it's implemented in micrograd.
+>   - Negation and subtraction invole multiplication with -1 and division involves raising to the power -1, instead of direct implementations, similar to how it's implemented in micrograd.
 > - Run examples with the `release` flag (`cargo run --release --example <example>`) for more optimized performance.
 
 ###### Credits

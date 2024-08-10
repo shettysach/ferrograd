@@ -12,9 +12,3 @@ uuid = { version = "1.9.1", features = ["v4"] }
 
 [dev-dependencies]
 rust-mnist = "0.2"
-
-[package.metadata.docs.rs]
-rustdoc-args = [
-    "--html-in-header",
-    ".cargo/registry/src/github.com-1ecc6299db9ec823/katex-doc-0.1.0/katex.html",
-]
