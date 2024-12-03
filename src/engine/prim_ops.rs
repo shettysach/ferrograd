@@ -10,7 +10,7 @@ fn add(self: Value, rhs: Value) -> Value {
         Some(add_backward),
         vec![self.clone(), rhs.clone()],
         Some(Operation::Add),
-        Some(String::new()),
+        None,
     )
 }
 
@@ -21,7 +21,7 @@ fn add(self: Value, rhs: f64) -> Value {
         Some(add_backward),
         vec![self.clone(), Value::_new_const(rhs)],
         Some(Operation::Add),
-        Some(String::new()),
+        None,
     )
 }
 
@@ -32,13 +32,13 @@ fn add(self: f64, rhs: Value) -> Value {
         Some(add_backward),
         vec![Value::_new_const(self), rhs.clone()],
         Some(Operation::Add),
-        Some(String::new()),
+        None,
     )
 }
 
 fn add_backward(value: &V) {
-    value._prev[0].borrow_mut().grad += value.grad;
-    value._prev[1].borrow_mut().grad += value.grad;
+    value.prev[0].borrow_mut().grad += value.grad;
+    value.prev[1].borrow_mut().grad += value.grad;
 }
 
 // Multiplication
@@ -50,7 +50,7 @@ fn mul(self: Value, rhs: Value) -> Value {
         Some(mul_backward),
         vec![self.clone(), rhs.clone()],
         Some(Operation::Mul),
-        Some(String::new()),
+        None,
     )
 }
 
@@ -61,7 +61,7 @@ fn mul(self: Value, rhs: f64) -> Value {
         Some(mul_backward),
         vec![self.clone(), Value::_new_const(rhs)],
         Some(Operation::Mul),
-        Some(String::new()),
+        None,
     )
 }
 
@@ -72,15 +72,15 @@ fn mul(self: f64, rhs: Value) -> Value {
         Some(mul_backward),
         vec![Value::_new_const(self), rhs.clone()],
         Some(Operation::Mul),
-        Some(String::new()),
+        None,
     )
 }
 
 fn mul_backward(value: &V) {
-    let data0 = value._prev[0].borrow().data;
-    let data1 = value._prev[1].borrow().data;
-    value._prev[0].borrow_mut().grad += data1 * value.grad;
-    value._prev[1].borrow_mut().grad += data0 * value.grad;
+    let data0 = value.prev[0].borrow().data;
+    let data1 = value.prev[1].borrow().data;
+    value.prev[0].borrow_mut().grad += data1 * value.grad;
+    value.prev[1].borrow_mut().grad += data0 * value.grad;
 }
 
 // Power, Ln and Exp
@@ -90,14 +90,13 @@ impl Value {
         Value::init(
             self.borrow().data.powf(power),
             Some(|value: &V| {
-                let base = value._prev[0].borrow().data;
-                let power = value._prev[1].borrow().data;
-                value._prev[0].borrow_mut().grad +=
-                    power * base.powf(power - 1.0) * value.grad;
+                let base = value.prev[0].borrow().data;
+                let power = value.prev[1].borrow().data;
+                value.prev[0].borrow_mut().grad += power * base.powf(power - 1.0) * value.grad;
             }),
             vec![self.clone(), Value::_new_const(power)],
             Some(Operation::Pow),
-            Some(String::new()),
+            None,
         )
     }
 
@@ -105,12 +104,12 @@ impl Value {
         Value::init(
             self.borrow().data.ln(),
             Some(|value: &V| {
-                let mut prev = value._prev[0].borrow_mut();
+                let mut prev = value.prev[0].borrow_mut();
                 prev.grad += value.grad / prev.data;
             }),
             vec![self.clone()],
             Some(Operation::Ln),
-            Some(String::new()),
+            None,
         )
     }
 
@@ -118,11 +117,11 @@ impl Value {
         Value::init(
             self.borrow().data.exp(),
             Some(|value: &V| {
-                value._prev[0].borrow_mut().grad += value.data * value.grad;
+                value.prev[0].borrow_mut().grad += value.data * value.grad;
             }),
             vec![self.clone()],
             Some(Operation::Exp),
-            Some(String::new()),
+            None,
         )
     }
 

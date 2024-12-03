@@ -101,9 +101,7 @@ impl Neuron {
             .map(|(i, row)| {
                 row.iter()
                     .enumerate()
-                    .map(|(j, xij)| {
-                        xij.clone().with_name(&format!("X[{i}][{j}]"))
-                    })
+                    .map(|(j, xij)| xij.clone().with_name(&format!("x[{i}][{j}]")))
                     .collect()
             })
             .collect()

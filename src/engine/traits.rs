@@ -5,7 +5,7 @@ use std::{cmp::Ordering, fmt, hash::Hash};
 
 impl Hash for Value {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.borrow()._uuid.hash(state);
+        self.borrow().uuid.hash(state);
     }
 }
 
@@ -15,7 +15,7 @@ impl Eq for Value {}
 
 impl PartialEq for Value {
     fn eq(&self, other: &Value) -> bool {
-        self.borrow()._uuid == other.borrow()._uuid
+        self.borrow().uuid == other.borrow().uuid
     }
 }
 
@@ -43,9 +43,9 @@ impl fmt::Debug for Value {
         f.debug_struct("Value")
             .field("data", &self.borrow().data)
             .field("grad", &self.borrow().grad)
-            .field("name", &self.borrow()._var_name)
-            .field("op", &self.borrow()._op)
-            .field("prev", &self.borrow()._prev)
+            .field("name", &self.borrow().var_name)
+            .field("op", &self.borrow().op)
+            .field("prev", &self.borrow().prev)
             .finish()
     }
 }
@@ -62,12 +62,11 @@ impl fmt::Display for Value {
             }
         };
 
-        match (&v._var_name, &v._op) {
+        match (&v.var_name, &v.op) {
             (Some(var_name), Some(op)) => {
                 write!(
                     f,
-                    "{} data = {:.3}, grad = {:.3} {}",
-                    op,
+                    "{op} data = {:.3}, grad = {:.3} {}",
                     v.data,
                     v.grad,
                     fmt_name(var_name)
@@ -81,6 +80,9 @@ impl fmt::Display for Value {
                     v.grad,
                     fmt_name(var_name)
                 )
+            }
+            (None, Some(op)) => {
+                write!(f, "{op} data = {:.3}, grad = {:.3}", v.data, v.grad,)
             }
             (None, _) => {
                 write!(f, "{:.3}", v.data)

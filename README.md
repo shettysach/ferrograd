@@ -231,7 +231,7 @@ cargo run --example test_mnist
 ```
 
 <div "align: center;">
-    <img src="mnist.gif" width="55%">
+    <img src="mnist.gif" width="75%">
 </div>
 
 ---
@@ -368,7 +368,7 @@ Accuracy metrics
 >
 > - Created for educational purposes and not optimized for performance.
 >   - Uses scalar values (`Value`) and operations. `Vec<Value>` and `Vec<Vec<Value>>` are used in place of tensors.
->   - Negation and subtraction invole multiplication with -1 and division involves raising to the power -1, instead of direct implementations, similar to how it's implemented in micrograd.
+>   - Negation and subtraction invole multiplication with -1 and division involves raising to the power -1, instead of direct implementations, similar to how it is implemented in micrograd.
 > - Run examples with the `release` flag (`cargo run --release --example <example>`) for more optimized performance.
 
 ###### Credits

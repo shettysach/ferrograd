@@ -9,11 +9,7 @@ pub struct MultiLayerPerceptron {
 
 impl MultiLayerPerceptron {
     /// Initialise new MLP.
-    pub fn new(
-        nin: u32,
-        mut nouts: Vec<u32>,
-        actv_fn: Activation,
-    ) -> MultiLayerPerceptron {
+    pub fn new(nin: u32, mut nouts: Vec<u32>, actv_fn: Activation) -> MultiLayerPerceptron {
         nouts.insert(0, nin);
         let n = nouts.len() - 1;
 

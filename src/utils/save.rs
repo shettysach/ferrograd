@@ -1,8 +1,8 @@
-use crate::nn::mlp::MultiLayerPerceptron;
+use crate::nn::MultiLayerPerceptron;
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::{fs::File, io::Result, path::Path};
 
-// Thanks to https://gist.github.com/rust-play/e710e311a2ad808b5a8789d5e4457426
+// Modified from https://gist.github.com/rust-play/e710e311a2ad808b5a8789d5e4457426
 
 impl MultiLayerPerceptron {
     /// Save model weights at the given filepath.

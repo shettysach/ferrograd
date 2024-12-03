@@ -9,11 +9,11 @@ pub struct Value(Rc<RefCell<V>>); // Smart pointer to V
 pub struct V {
     pub data: f64,
     pub grad: f64,
-    pub _backward: Option<fn(value: &V)>, // Function pointer to the backward function
-    pub _prev: Vec<Value>,                // Children (Operands)
-    pub _op: Option<Operation>,           // None if initialisation or constant
-    pub _uuid: Uuid,                      // Unique id for easier hashing and eq
-    pub _var_name: Option<String>,        // None if constant
+    pub(crate) backward: Option<fn(value: &V)>, // Function pointer to the backward function
+    pub(crate) prev: Vec<Value>,                // Children (Operands)
+    pub(crate) op: Option<Operation>,           // None if initialisation or constant
+    pub(crate) uuid: Uuid,                      // Unique id for easier hashing and eq
+    pub(crate) var_name: Option<String>,        // Variable name
 }
 
 // val.0.borrow() becomes val.borrow()
@@ -36,17 +36,17 @@ impl Value {
         Value(Rc::new(RefCell::new(V {
             data,
             grad: 0.0,
-            _backward: backward,
-            _prev: prev,
-            _op: op,
-            _uuid: Uuid::new_v4(),
-            _var_name: var_name,
+            backward,
+            prev,
+            op,
+            uuid: Uuid::new_v4(),
+            var_name,
         })))
     }
 
     /// Initialise new Value from a f64.
     pub fn new(data: f64) -> Value {
-        Value::init(data, None, Vec::new(), None, Some(String::new()))
+        Value::init(data, None, Vec::new(), None, None)
     }
 
     /// Initialise new 1d vector of Values from a 1d vector of f64.
@@ -105,7 +105,7 @@ pub enum Activation {
 impl Value {
     /// Assign var_name to the Value
     pub fn with_name(self, var_name: &str) -> Value {
-        self.borrow_mut()._var_name = Some(var_name.to_string());
+        self.borrow_mut().var_name = Some(var_name.to_string());
         self
     }
 }

@@ -6,12 +6,11 @@ impl Value {
         Value::init(
             self.borrow().data.max(0.0),
             Some(|value: &V| {
-                value._prev[0].borrow_mut().grad +=
-                    if value.data > 0.0 { value.grad } else { 0.0 };
+                value.prev[0].borrow_mut().grad += if value.data > 0.0 { value.grad } else { 0.0 };
             }),
             vec![self.clone()],
             Some(Operation::AF(Activation::ReLU)),
-            Some(String::new()),
+            None,
         )
     }
 
@@ -21,7 +20,7 @@ impl Value {
         Value::init(
             x.max(0.01 * x),
             Some(|value: &V| {
-                value._prev[0].borrow_mut().grad += if value.data > 0.0 {
+                value.prev[0].borrow_mut().grad += if value.data > 0.0 {
                     value.grad
                 } else {
                     0.01 * value.grad
@@ -29,7 +28,7 @@ impl Value {
             }),
             vec![self.clone()],
             Some(Operation::AF(Activation::LeakyReLU)),
-            Some(String::new()),
+            None,
         )
     }
 
@@ -39,12 +38,11 @@ impl Value {
         Value::init(
             (e2x - 1.0) / (e2x + 1.0),
             Some(|value: &V| {
-                value._prev[0].borrow_mut().grad +=
-                    (1.0 - (value.data.powi(2))) * value.grad;
+                value.prev[0].borrow_mut().grad += (1.0 - value.data.powi(2)) * value.grad;
             }),
             vec![self.clone()],
             Some(Operation::AF(Activation::Tanh)),
-            Some(String::new()),
+            None,
         )
     }
 
@@ -54,12 +52,11 @@ impl Value {
         Value::init(
             1.0 / (1.0 + em1x),
             Some(|value: &V| {
-                value._prev[0].borrow_mut().grad +=
-                    value.data * (1.0 - value.data) * value.grad;
+                value.prev[0].borrow_mut().grad += value.data * (1.0 - value.data) * value.grad;
             }),
             vec![self.clone()],
             Some(Operation::AF(Activation::Sigmoid)),
-            Some(String::new()),
+            None,
         )
     }
 }
