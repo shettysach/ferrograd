@@ -1,15 +1,13 @@
-use crate::engine::{Activation, Value};
+use crate::engine::{ActvFn, Value};
 use crate::nn::Layer;
 use std::fmt;
 
-/// Artificial neural network with dense layers and a non-linear activation function.
 pub struct MultiLayerPerceptron {
     layers: Vec<Layer>,
 }
 
 impl MultiLayerPerceptron {
-    /// Initialise new MLP.
-    pub fn new(nin: u32, mut nouts: Vec<u32>, actv_fn: Activation) -> MultiLayerPerceptron {
+    pub fn new(nin: u32, mut nouts: Vec<u32>, actv_fn: ActvFn) -> MultiLayerPerceptron {
         nouts.insert(0, nin);
         let n = nouts.len() - 1;
 
@@ -38,7 +36,6 @@ impl MultiLayerPerceptron {
         x.iter().map(|xrow| self.forw(xrow)).collect()
     }
 
-    /// Returns 1d vec of weights and biases of all the neurons of the perceptron.
     pub fn parameters(&self) -> Vec<Value> {
         self.layers.iter().flat_map(|l| l.parameters()).collect()
     }
@@ -47,9 +44,9 @@ impl MultiLayerPerceptron {
 impl fmt::Display for MultiLayerPerceptron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "MLP:").unwrap();
-        self.layers.iter().enumerate().for_each(|(i, layer)| {
+        for (i, layer) in self.layers.iter().enumerate() {
             writeln!(f, "  layer {}: [ {} ]", i, layer).unwrap();
-        });
+        }
         Ok(())
     }
 }
@@ -58,9 +55,9 @@ impl fmt::Debug for MultiLayerPerceptron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut debug_struct = f.debug_struct("MultiLayerPerceptron");
         debug_struct.field("parameters", &self.parameters().len());
-        self.layers.iter().enumerate().for_each(|(i, layer)| {
+        for (i, layer) in self.layers.iter().enumerate() {
             debug_struct.field(&format!("layer {}", i), layer);
-        });
+        }
         debug_struct.finish()
     }
 }

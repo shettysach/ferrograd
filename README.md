@@ -2,7 +2,6 @@
 
 - A small autograd engine, inspired from [karpathy/micrograd](https://github.com/karpathy/micrograd), with more features, such as additional activation functions, optimizers, loss criterions, accuracy metrics, and the ability to save and load model weights after training.
 - Capable of creating neurons, dense layers and multilayer perceptrons, for non-linear classification tasks.
-- Created for learning purposes. See `notes` directory.
 
 ```console
 cargo add --git https://github.com/shettysach/ferrograd.git ferrograd
@@ -59,19 +58,19 @@ b.grad = 645.5773
 use ferrograd::engine::Value;
 
 fn main() {
-    let a = Value::new(5.6).with_name("a");
-    let b = Value::new(10.8).with_name("b");
+    let a = Value::new_with_name(5.6, 'a');
+    let b = Value::new_with_name(10.8, 'b');
 
-    let c = Value::new(-15.12).with_name("c");
-    let d = Value::new(2.5).with_name("d");
+    let c = Value::new_with_name(-15.12, 'c');
+    let d = Value::new_with_name(2.5, 'd');
 
     let e = (&a + &b) / 50.0;
-    let e = e.with_name("e");
+    let e = e.with_name('e');
 
     let f = (&d - &c) * 5.5625;
-    let f = f.with_name("f");
+    let f = f.with_name('f');
 
-    let g = (e * f).leaky_relu().with_name("g");
+    let g = (e * f).leaky_relu().with_name('g');
     g.backward();
 
     println!("{}", g.tree());
@@ -133,29 +132,29 @@ cargo run --example neuron
 ```
 ReLU(2)
 
-Forward pass:
-ReLU data = 1.800, grad = 0.000
-└── + data = 1.800, grad = 0.000
-    ├── + data = 1.800, grad = 0.000
-    │   ├── * data = 1.911, grad = 0.000
-    │   │   ├── data = 0.955, grad = 0.000 ← weight[0]
-    │   │   └── data = 2.000, grad = 0.000 ← x[0][0]
-    │   └── * data = -0.111, grad = 0.000
-    │       ├── data = -0.111, grad = 0.000 ← weight[1]
-    │       └── data = 1.000, grad = 0.000 ← x[1][0]
-    └── data = 0.000, grad = 0.000 ← bias
+Forward pass: 
+ReLU data = 0.562, grad = 0.000
+└── + data = 0.562, grad = 0.000
+    ├── + data = 0.562, grad = 0.000
+    │   ├── * data = 1.360, grad = 0.000
+    │   │   ├── data = 0.680, grad = 0.000 ← w
+    │   │   └── data = 2.000, grad = 0.000 ← X
+    │   └── * data = -0.798, grad = 0.000
+    │       ├── data = -0.798, grad = 0.000 ← w
+    │       └── data = 1.000, grad = 0.000 ← X
+    └── data = 0.000, grad = 0.000 ← b
 
-Backward pass:
-ReLU data = 1.800, grad = 1.000
-└── + data = 1.800, grad = 1.000
-    ├── + data = 1.800, grad = 1.000
-    │   ├── * data = 1.911, grad = 1.000
-    │   │   ├── data = 0.955, grad = 2.000 ← weight[0]
-    │   │   └── data = 2.000, grad = 0.955 ← x[0][0]
-    │   └── * data = -0.111, grad = 1.000
-    │       ├── data = -0.111, grad = 1.000 ← weight[1]
-    │       └── data = 1.000, grad = -0.111 ← x[1][0]
-    └── data = 0.000, grad = 1.000 ← bias
+Backward pass: 
+ReLU data = 0.562, grad = 1.000
+└── + data = 0.562, grad = 1.000
+    ├── + data = 0.562, grad = 1.000
+    │   ├── * data = 1.360, grad = 1.000
+    │   │   ├── data = 0.680, grad = 2.000 ← w
+    │   │   └── data = 2.000, grad = 0.680 ← X
+    │   └── * data = -0.798, grad = 1.000
+    │       ├── data = -0.798, grad = 1.000 ← w
+    │       └── data = 1.000, grad = -0.798 ← X
+    └── data = 0.000, grad = 1.000 ← b
 ```
 
 ---
@@ -240,7 +239,7 @@ cargo run --example test_mnist
 
 ```rust
 use ferrograd::{
-    engine::{Activation, Value},
+    engine::{ActvFn, Value},
     loss::HingeLoss,
     metrics::BinaryAccuracy,
     nn::{
@@ -253,7 +252,7 @@ use ferrograd::{
 fn main() {
     let (xs, ys) = read_csv("data/moons_data.csv", &[0, 1], &[2], 1);
 
-    let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::ReLU);
+    let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], ActvFn::ReLU);
     println!("{}", model);
     println!("Number of parameters: {}\n", model.parameters().len());
 
@@ -266,7 +265,7 @@ fn main() {
         optim, loss, accuracy
     );
 
-    (0..100).for_each(|k| {
+    for k in 0..100 {
         let ypred = model.forward(&xs);
 
         let data_loss = loss.loss(&ypred, &ys);
@@ -285,7 +284,7 @@ fn main() {
             total_loss.borrow().data,
             acc * 100.0
         );
-    });
+    }
 
     println!();
     print_grid(&model, 15);
@@ -342,6 +341,13 @@ ASCII contour graph -
 
 ---
 
+> NOTE:
+>
+> - Created for learning and not optimized for performance.
+>   - Uses scalar values (`Value`) and operations. `Vec<Value>` and `Vec<Vec<Value>>` are used in place of 1d and 2d tensors.
+>   - Negation and subtraction involves multiplication with -1 and division involves raising to the power -1, instead of direct implementations, similar to how it is implemented in micrograd.
+> - Run examples with the `release` flag (`cargo run --release --example <example>`) for more better performance.
+
 ```
 Optimizers
 ├ Adam
@@ -363,14 +369,6 @@ Activation functions
 Accuracy metrics
 └ Binary accuracy
 ```
-
-> NOTE:
->
-> - Created for educational purposes and not optimized for performance.
->   - Uses scalar values (`Value`) and operations. `Vec<Value>` and `Vec<Vec<Value>>` are used in place of tensors.
->   - Negation and subtraction invole multiplication with -1 and division involves raising to the power -1, instead of direct implementations, similar to how it is implemented in micrograd.
-> - Run examples with the `release` flag (`cargo run --release --example <example>`) for more optimized performance.
-
 ###### Credits
 
 - [karpathy/micrograd](https://github.com/karpathy/micrograd)

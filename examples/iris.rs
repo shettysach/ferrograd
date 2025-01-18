@@ -1,5 +1,5 @@
 use ferrograd::{
-    engine::{Activation, Value},
+    engine::{ActvFn, Value},
     loss::CrossEntropyLoss,
     metrics::BinaryAccuracy,
     nn::{
@@ -11,7 +11,7 @@ use ferrograd::{
 fn main() {
     let (xs, ys) = read_iris_csv();
 
-    let model = MultiLayerPerceptron::new(4, vec![16, 16, 3], Activation::ReLU);
+    let model = MultiLayerPerceptron::new(4, vec![16, 16, 3], ActvFn::ReLU);
     println!("Model - \n{}", model);
     println!("Number of parameters = {}\n", model.parameters().len());
 
@@ -24,7 +24,7 @@ fn main() {
         optim, loss, accuracy
     );
 
-    (0..100).for_each(|k| {
+    for k in 0..100 {
         let ypred = softmax(&model.forward(&xs));
 
         let data_loss = loss.loss(&ypred, &ys);
@@ -43,14 +43,14 @@ fn main() {
             total_loss.borrow().data,
             acc * 100.0
         );
-    });
+    }
 
-    let samples = vec![
-        vec![5.1, 3.5, 1.4, 0.2],
-        vec![7.2, 2.7, 6.0, 2.0],
-        vec![5.8, 2.7, 3.9, 1.2],
+    let samples: &[&[f64]] = &[
+        &[5.1, 3.5, 1.4, 0.2],
+        &[7.2, 2.7, 6.0, 2.0],
+        &[5.8, 2.7, 3.9, 1.2],
     ];
-    let x = Value::new_2d(&samples);
+    let x = Value::new_2d(samples);
 
     let preds = model.forward(&x);
 

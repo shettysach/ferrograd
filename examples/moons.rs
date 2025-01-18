@@ -1,5 +1,5 @@
 use ferrograd::{
-    engine::{Activation, Value},
+    engine::{ActvFn, Value},
     loss::HingeLoss,
     metrics::BinaryAccuracy,
     nn::{
@@ -12,7 +12,7 @@ use ferrograd::{
 fn main() {
     let (xs, ys) = read_csv("data/moons_data.csv", &[0, 1], &[2], 1);
 
-    let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], Activation::ReLU);
+    let model = MultiLayerPerceptron::new(2, vec![16, 16, 1], ActvFn::ReLU);
     println!("{}", model);
     println!("Number of parameters: {}\n", model.parameters().len());
 
@@ -25,7 +25,7 @@ fn main() {
         optim, loss, accuracy
     );
 
-    (0..100).for_each(|k| {
+    for k in 0..100 {
         let ypred = model.forward(&xs);
 
         let data_loss = loss.loss(&ypred, &ys);
@@ -44,7 +44,7 @@ fn main() {
             total_loss.borrow().data,
             acc * 100.0
         );
-    });
+    }
 
     println!();
     print_grid(&model, 15);
@@ -54,8 +54,8 @@ fn main() {
 
 fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
     println!("\nASCII contour graph - \n■ > 0.0  \n□ <= 0.0 ");
-    (-bound..bound).for_each(|y| {
-        (-bound..bound).for_each(|x| {
+    for y in -bound..bound {
+        for x in -bound..bound {
             let k = &model.forward(&[vec![
                 Value::new(x as f64 / bound as f64 * 2.0),
                 Value::new(-y as f64 / bound as f64 * 2.0),
@@ -66,7 +66,7 @@ fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
             } else {
                 print!("□ ");
             }
-        });
+        }
         println!();
-    });
+    }
 }

@@ -46,28 +46,28 @@ fn div(self: f64, rhs: Value) -> Value {
 
 #[opimps::impl_ops_assign(ops::AddAssign)]
 fn add_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name.clone();
+    let name = self.borrow().var_name;
     *self = &*self + rhs;
     self.borrow_mut().var_name = name;
 }
 
 #[opimps::impl_ops_assign(ops::MulAssign)]
 fn mul_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name.clone();
+    let name = self.borrow().var_name;
     *self = &*self * rhs;
     self.borrow_mut().var_name = name;
 }
 
 #[opimps::impl_ops_assign(ops::SubAssign)]
 fn sub_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name.clone();
+    let name = self.borrow().var_name;
     *self = &*self - rhs;
     self.borrow_mut().var_name = name;
 }
 
 #[opimps::impl_ops_assign(ops::DivAssign)]
 fn div_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name.clone();
+    let name = self.borrow().var_name;
     *self = &*self / rhs;
     self.borrow_mut().var_name = name;
 }

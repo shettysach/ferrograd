@@ -1,66 +1,61 @@
-use crate::engine::{Activation, Operation, Value};
+use crate::engine::{ActvFn, Op, Value};
 use rand::{distributions::Uniform, Rng};
 use std::fmt;
 
-/// Neuron with weights and a bias.
 pub struct Neuron {
-    pub w: Vec<Value>,              // Weights
-    pub b: Value,                   // Bias
-    pub nonlin: Option<Activation>, // None if linear
+    pub weights: Vec<Value>,
+    pub bias: Value,
+    pub actv_fn: Option<ActvFn>,
 }
 
 impl Neuron {
-    /// Initialise new Neuron with uniformly distributed random weights and zero bias.
-    pub fn new(nin: u32, nonlin: Option<Activation>) -> Neuron {
+    pub fn new(nin: u32, nonlin: Option<ActvFn>) -> Neuron {
         let mut rng = rand::thread_rng();
         let range = Uniform::<f64>::new(-1., 1.);
 
         Neuron {
-            w: (0..nin).map(|_| Value::new(rng.sample(range))).collect(),
-            b: Value::new(0.),
-            nonlin,
+            weights: (0..nin).map(|_| Value::new(rng.sample(range))).collect(),
+            bias: Value::new(0.),
+            actv_fn: nonlin,
         }
     }
 
-    /// Forward pass of a single 1d input x through the Neuron.
     pub fn forw(&self, x: &[Value]) -> Value {
         let act = self
-            .w
+            .weights
             .iter()
             .zip(x)
             .map(|(w_i, x_i)| w_i * x_i)
             .sum::<Value>()
-            + &self.b;
+            + &self.bias;
 
-        match self.nonlin {
-            Some(Activation::ReLU) => act.relu(),
-            Some(Activation::LeakyReLU) => act.leaky_relu(),
-            Some(Activation::Tanh) => act.tanh(),
-            Some(Activation::Sigmoid) => act.sigmoid(),
+        match self.actv_fn {
+            Some(ActvFn::ReLU) => act.relu(),
+            Some(ActvFn::LeakyReLU) => act.leaky_relu(),
+            Some(ActvFn::Tanh) => act.tanh(),
+            Some(ActvFn::Sigmoid) => act.sigmoid(),
             None => act,
         }
     }
 
-    /// Forward pass of 2d input x through the Neuron.
     pub fn forward(&self, x: &[Vec<Value>]) -> Vec<Value> {
         x.iter().map(|x_i| self.forw(x_i)).collect()
     }
 
-    /// Returns 1d vector of weights and bias.
     pub fn parameters(&self) -> Vec<Value> {
-        let mut p = self.w.clone();
-        p.push(self.b.clone());
+        let mut p = self.weights.clone();
+        p.push(self.bias.clone());
         p
     }
 }
 
 impl fmt::Display for Neuron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.nonlin {
+        match self.actv_fn {
             Some(val) => {
-                write!(f, "{}({})", Operation::AF(val), self.w.len())
+                write!(f, "{}({})", Op::ActvFn(val), self.weights.len())
             }
-            None => write!(f, "linear({})", self.w.len()),
+            None => write!(f, "linear({})", self.weights.len()),
         }
     }
 }
@@ -68,42 +63,34 @@ impl fmt::Display for Neuron {
 impl fmt::Debug for Neuron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut debug_struct = f.debug_struct("Neuron");
-        debug_struct.field("input", &self.w.len());
-        if let Some(val) = self.nonlin {
-            debug_struct.field("actv_fn", &Operation::AF(val));
+        debug_struct.field("input", &self.weights.len());
+        if let Some(val) = self.actv_fn {
+            debug_struct.field("actv_fn", &Op::ActvFn(val));
         }
         debug_struct.finish()
     }
 }
 
-// -- Extras --
-
 impl Neuron {
-    /// Assign `var_names` for parameters as `weight[i]` and `bias`.
     pub fn name_params(self) -> Neuron {
-        let w = self
-            .w
+        let weights = self
+            .weights
             .iter()
-            .enumerate()
-            .map(|(i, wi)| wi.clone().with_name(&format!("weight[{i}]")))
+            .map(|wi| wi.clone().with_name('w'))
             .collect();
-        let b = self.b.clone().with_name("bias");
-        let nonlin = self.nonlin;
-        Neuron { w, b, nonlin }
+        let bias = self.bias.clone().with_name('b');
+        let nonlin = self.actv_fn;
+
+        Neuron {
+            weights,
+            bias,
+            actv_fn: nonlin,
+        }
     }
 
-    /** Assign `var_names` for inputs as `x[i][j]`.
-    `i` stands for the ith feature.
-    `j` stands for the jth sample. */
     pub fn name_inputs(&self, x: Vec<Vec<Value>>) -> Vec<Vec<Value>> {
         x.iter()
-            .enumerate()
-            .map(|(i, row)| {
-                row.iter()
-                    .enumerate()
-                    .map(|(j, xij)| xij.clone().with_name(&format!("x[{i}][{j}]")))
-                    .collect()
-            })
+            .map(|row| row.iter().map(|xij| xij.clone().with_name('X')).collect())
             .collect()
     }
 }

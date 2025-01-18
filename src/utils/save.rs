@@ -33,10 +33,9 @@ impl MultiLayerPerceptron {
             "Mismatching number of parameters"
         );
 
-        params
-            .into_iter()
-            .zip(buf)
-            .for_each(|(value, weight)| value.borrow_mut().data = weight);
+        for (value, weight) in params.into_iter().zip(buf) {
+            value.borrow_mut().data = weight
+        }
 
         Ok(())
     }

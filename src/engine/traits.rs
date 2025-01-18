@@ -1,4 +1,4 @@
-use crate::engine::value::{Activation, Operation, Value};
+use crate::engine::value::{ActvFn, Op, Value};
 use std::{cmp::Ordering, fmt, hash::Hash};
 
 // -- Hash --
@@ -54,55 +54,41 @@ impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let v = &self.borrow();
 
-        let fmt_name = |var_name: &str| -> String {
-            if var_name.is_empty() {
-                String::new()
-            } else {
-                format!("← {}", var_name)
-            }
-        };
-
         match (&v.var_name, &v.op) {
-            (Some(var_name), Some(op)) => {
+            (Some(var_name), Op::Init) => {
                 write!(
                     f,
-                    "{op} data = {:.3}, grad = {:.3} {}",
-                    v.data,
-                    v.grad,
-                    fmt_name(var_name)
+                    "data = {:.3}, grad = {:.3} ← {}",
+                    v.data, v.grad, var_name
                 )
             }
-            (Some(var_name), None) => {
+            (Some(var_name), op) => {
                 write!(
                     f,
-                    "data = {:.3}, grad = {:.3} {}",
-                    v.data,
-                    v.grad,
-                    fmt_name(var_name)
+                    "{op} data = {:.3}, grad = {:.3} ← {}",
+                    v.data, v.grad, var_name
                 )
             }
-            (None, Some(op)) => {
+            (None, op) => {
                 write!(f, "{op} data = {:.3}, grad = {:.3}", v.data, v.grad,)
-            }
-            (None, _) => {
-                write!(f, "{:.3}", v.data)
             }
         }
     }
 }
 
-impl fmt::Display for Operation {
+impl fmt::Display for Op {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let symbol = match self {
-            Operation::Add => "+",
-            Operation::Mul => "*",
-            Operation::Pow => "^",
-            Operation::Ln => "ln",
-            Operation::Exp => "exp",
-            Operation::AF(Activation::ReLU) => "ReLU",
-            Operation::AF(Activation::LeakyReLU) => "LeakyReLU",
-            Operation::AF(Activation::Tanh) => "tanh",
-            Operation::AF(Activation::Sigmoid) => "σ",
+            Op::Init => "",
+            Op::Add => "+",
+            Op::Mul => "*",
+            Op::Pow => "^",
+            Op::Ln => "ln",
+            Op::Exp => "exp",
+            Op::ActvFn(ActvFn::ReLU) => "ReLU",
+            Op::ActvFn(ActvFn::LeakyReLU) => "LeakyReLU",
+            Op::ActvFn(ActvFn::Tanh) => "tanh",
+            Op::ActvFn(ActvFn::Sigmoid) => "σ",
         };
         write!(f, "{}", symbol)
     }

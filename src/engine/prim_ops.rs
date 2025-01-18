@@ -1,4 +1,4 @@
-use crate::engine::value::{Operation, Value, V};
+use crate::engine::value::{Op, Prev, Value, V};
 use std::ops;
 
 // Addition
@@ -8,8 +8,8 @@ fn add(self: Value, rhs: Value) -> Value {
     Value::init(
         self.borrow().data + rhs.borrow().data,
         Some(add_backward),
-        vec![self.clone(), rhs.clone()],
-        Some(Operation::Add),
+        Prev::Binary(self.clone(), rhs.clone()),
+        Op::Add,
         None,
     )
 }
@@ -19,8 +19,8 @@ fn add(self: Value, rhs: f64) -> Value {
     Value::init(
         self.borrow().data + rhs,
         Some(add_backward),
-        vec![self.clone(), Value::_new_const(rhs)],
-        Some(Operation::Add),
+        Prev::Binary(self.clone(), Value::new_const(rhs)),
+        Op::Add,
         None,
     )
 }
@@ -30,15 +30,17 @@ fn add(self: f64, rhs: Value) -> Value {
     Value::init(
         self + rhs.borrow().data,
         Some(add_backward),
-        vec![Value::_new_const(self), rhs.clone()],
-        Some(Operation::Add),
+        Prev::Binary(Value::new_const(self), rhs.clone()),
+        Op::Add,
         None,
     )
 }
 
 fn add_backward(value: &V) {
-    value.prev[0].borrow_mut().grad += value.grad;
-    value.prev[1].borrow_mut().grad += value.grad;
+    if let Prev::Binary(a, b) = &value.prev {
+        a.borrow_mut().grad += value.grad;
+        b.borrow_mut().grad += value.grad;
+    }
 }
 
 // Multiplication
@@ -48,8 +50,8 @@ fn mul(self: Value, rhs: Value) -> Value {
     Value::init(
         self.borrow().data * rhs.borrow().data,
         Some(mul_backward),
-        vec![self.clone(), rhs.clone()],
-        Some(Operation::Mul),
+        Prev::Binary(self.clone(), rhs.clone()),
+        Op::Mul,
         None,
     )
 }
@@ -59,8 +61,8 @@ fn mul(self: Value, rhs: f64) -> Value {
     Value::init(
         self.borrow().data * rhs,
         Some(mul_backward),
-        vec![self.clone(), Value::_new_const(rhs)],
-        Some(Operation::Mul),
+        Prev::Binary(self.clone(), Value::new_const(rhs)),
+        Op::Mul,
         None,
     )
 }
@@ -70,17 +72,19 @@ fn mul(self: f64, rhs: Value) -> Value {
     Value::init(
         self * rhs.borrow().data,
         Some(mul_backward),
-        vec![Value::_new_const(self), rhs.clone()],
-        Some(Operation::Mul),
+        Prev::Binary(Value::new_const(self), rhs.clone()),
+        Op::Mul,
         None,
     )
 }
 
 fn mul_backward(value: &V) {
-    let data0 = value.prev[0].borrow().data;
-    let data1 = value.prev[1].borrow().data;
-    value.prev[0].borrow_mut().grad += data1 * value.grad;
-    value.prev[1].borrow_mut().grad += data0 * value.grad;
+    if let Prev::Binary(a, b) = &value.prev {
+        let data_a = a.borrow().data;
+        let data_b = b.borrow().data;
+        a.borrow_mut().grad += data_b * value.grad;
+        b.borrow_mut().grad += data_a * value.grad;
+    }
 }
 
 // Power, Ln and Exp
@@ -90,12 +94,14 @@ impl Value {
         Value::init(
             self.borrow().data.powf(power),
             Some(|value: &V| {
-                let base = value.prev[0].borrow().data;
-                let power = value.prev[1].borrow().data;
-                value.prev[0].borrow_mut().grad += power * base.powf(power - 1.0) * value.grad;
+                if let Prev::Binary(a, b) = &value.prev {
+                    let base = a.borrow().data;
+                    let power = b.borrow().data;
+                    a.borrow_mut().grad += power * base.powf(power - 1.0) * value.grad;
+                }
             }),
-            vec![self.clone(), Value::_new_const(power)],
-            Some(Operation::Pow),
+            Prev::Binary(self.clone(), Value::new_const(power)),
+            Op::Pow,
             None,
         )
     }
@@ -104,11 +110,13 @@ impl Value {
         Value::init(
             self.borrow().data.ln(),
             Some(|value: &V| {
-                let mut prev = value.prev[0].borrow_mut();
-                prev.grad += value.grad / prev.data;
+                if let Prev::Unary(a) = &value.prev {
+                    let mut prev = a.borrow_mut();
+                    prev.grad += value.grad / prev.data;
+                }
             }),
-            vec![self.clone()],
-            Some(Operation::Ln),
+            Prev::Unary(self.clone()),
+            Op::Ln,
             None,
         )
     }
@@ -117,16 +125,17 @@ impl Value {
         Value::init(
             self.borrow().data.exp(),
             Some(|value: &V| {
-                value.prev[0].borrow_mut().grad += value.data * value.grad;
+                if let Prev::Unary(a) = &value.prev {
+                    a.borrow_mut().grad += value.data * value.grad;
+                }
             }),
-            vec![self.clone()],
-            Some(Operation::Exp),
+            Prev::Unary(self.clone()),
+            Op::Exp,
             None,
         )
     }
 
-    // For initialising constants
-    fn _new_const(data: f64) -> Value {
-        Value::init(data, None, Vec::new(), None, None)
+    fn new_const(data: f64) -> Value {
+        Value::init(data, None, Prev::Init, Op::Init, None)
     }
 }

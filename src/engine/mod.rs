@@ -5,4 +5,4 @@ mod prim_ops;
 mod traits;
 mod value;
 
-pub use value::{Activation, Operation, Value};
+pub use value::{ActvFn, Op, Value};

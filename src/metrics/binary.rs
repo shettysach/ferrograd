@@ -1,18 +1,15 @@
 use crate::engine::Value;
 
-/// Binary Accuracy
 #[derive(Debug)]
 pub struct BinaryAccuracy {
     threshold: f64,
 }
 
 impl BinaryAccuracy {
-    /// Initialise new accuracy metric.
     pub fn new(threshold: f64) -> BinaryAccuracy {
         BinaryAccuracy { threshold }
     }
 
-    /// Compute accuracy.
     pub fn compute(&self, ypred: &[Vec<Value>], ytrue: &[Vec<Value>]) -> f64 {
         ypred
             .iter()

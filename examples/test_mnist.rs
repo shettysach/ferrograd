@@ -1,13 +1,12 @@
 use ferrograd::{
-    engine::{Activation, Value},
+    engine::{ActvFn, Value},
     nn::{softmax, MultiLayerPerceptron},
 };
 use rand::Rng;
 
 fn main() {
     // MLP
-    let model =
-        MultiLayerPerceptron::new(784, vec![64, 32, 10], Activation::LeakyReLU);
+    let model = MultiLayerPerceptron::new(784, vec![64, 32, 10], ActvFn::LeakyReLU);
     println!("{}\n", model);
 
     let model_path = "model/mod_64x32";
@@ -70,14 +69,14 @@ fn images_to_features(imgvec: &[[u8; 784]]) -> Vec<Vec<Value>> {
 }
 
 fn print_mnist_image(image: &[u8; 28 * 28]) {
-    (0..28).for_each(|row| {
-        (0..28).for_each(|col| {
+    for row in 0..28 {
+        for col in 0..28 {
             if image[row * 28 + col] == 0 {
                 print!("□ ");
             } else {
                 print!("■ ");
             }
-        });
+        }
         println!();
-    });
+    }
 }

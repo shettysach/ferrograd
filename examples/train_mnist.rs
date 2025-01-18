@@ -1,5 +1,5 @@
 use ferrograd::{
-    engine::{Activation, Value},
+    engine::{ActvFn, Value},
     loss::CrossEntropyLoss,
     metrics::BinaryAccuracy,
     nn::{
@@ -14,8 +14,7 @@ fn main() {
     let mnist = rust_mnist::Mnist::new("data/mnist/");
 
     // MLP
-    let model =
-        MultiLayerPerceptron::new(784, vec![64, 32, 10], Activation::LeakyReLU);
+    let model = MultiLayerPerceptron::new(784, vec![64, 32, 10], ActvFn::LeakyReLU);
     println!("Model: {:#?}\n", model);
 
     // Optimizer, loss criterion and accuracy metric
@@ -31,7 +30,7 @@ fn main() {
     let model_path = "model/mod_64x32";
 
     // Training
-    (0..200).for_each(|k| {
+    for k in 0..200 {
         let b = k % 10;
         let start = b * batch_size;
         let end = (b + 1) * batch_size;
@@ -68,7 +67,7 @@ fn main() {
                 Err(err) => eprintln!("{}", err),
             };
         }
-    });
+    }
 
     // Loading training data
     let test_samples = 100;

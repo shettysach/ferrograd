@@ -1,15 +1,13 @@
-use crate::engine::{Activation, Value};
+use crate::engine::{ActvFn, Value};
 use crate::nn::Neuron;
 use std::fmt;
 
-/// Dense layer of Neurons.
 pub struct Layer {
     neurons: Vec<Neuron>,
 }
 
 impl Layer {
-    /// Initialise new Layer.
-    pub fn new(nin: u32, nout: u32, nonlin: Option<Activation>) -> Layer {
+    pub fn new(nin: u32, nout: u32, nonlin: Option<ActvFn>) -> Layer {
         Layer {
             neurons: (0..nout).map(|_| Neuron::new(nin, nonlin)).collect(),
         }
@@ -25,7 +23,6 @@ impl Layer {
         x.iter().map(|xrow| self.forw(xrow)).collect()
     }
 
-    /// Returns 1d vector of weights and biases of the Neurons of the Layer.
     pub fn parameters(&self) -> Vec<Value> {
         self.neurons.iter().flat_map(|n| n.parameters()).collect()
     }

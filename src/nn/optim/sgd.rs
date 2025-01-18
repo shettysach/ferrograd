@@ -1,7 +1,6 @@
 use crate::engine::Value;
 use std::fmt;
 
-/// Stochastic Gradient Descent with momentum.
 pub struct SGD {
     params: Vec<Value>,
     lr: f64,
@@ -10,7 +9,6 @@ pub struct SGD {
 }
 
 impl SGD {
-    /// Initialise new optimizer.
     pub fn new(params: Vec<Value>, lr: f64, momentum: f64) -> SGD {
         let velocities = vec![0.0; params.len()];
 
@@ -22,18 +20,13 @@ impl SGD {
         }
     }
 
-    /// Perform a single optimizer step.
     pub fn step(&mut self) {
-        self.params.iter().zip(self.velocities.iter_mut()).for_each(
-            |(param, velocity)| {
-                (*velocity) =
-                    self.momentum * (*velocity) + self.lr * param.borrow().grad;
-                param.borrow_mut().data -= *velocity;
-            },
-        )
+        for (param, velocity) in self.params.iter().zip(self.velocities.iter_mut()) {
+            *velocity = self.momentum * (*velocity) + self.lr * param.borrow().grad;
+            param.borrow_mut().data -= *velocity;
+        }
     }
 
-    /// Set the gradients of all the parameters to zero.
     pub fn zero_grad(&self) {
         for p in &self.params {
             p.borrow_mut().grad = 0.0;
