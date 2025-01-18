@@ -1,5 +1,8 @@
 use crate::engine::value::Value;
-use std::{iter::Sum, ops};
+use std::{
+    iter::{Product, Sum},
+    ops,
+};
 
 // Negation
 
@@ -46,33 +49,33 @@ fn div(self: f64, rhs: Value) -> Value {
 
 #[opimps::impl_ops_assign(ops::AddAssign)]
 fn add_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name;
+    let name = self.borrow().name;
     *self = &*self + rhs;
-    self.borrow_mut().var_name = name;
+    self.borrow_mut().name = name;
 }
 
 #[opimps::impl_ops_assign(ops::MulAssign)]
 fn mul_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name;
+    let name = self.borrow().name;
     *self = &*self * rhs;
-    self.borrow_mut().var_name = name;
+    self.borrow_mut().name = name;
 }
 
 #[opimps::impl_ops_assign(ops::SubAssign)]
 fn sub_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name;
+    let name = self.borrow().name;
     *self = &*self - rhs;
-    self.borrow_mut().var_name = name;
+    self.borrow_mut().name = name;
 }
 
 #[opimps::impl_ops_assign(ops::DivAssign)]
 fn div_assign(self: Value, rhs: Value) {
-    let name = self.borrow().var_name;
+    let name = self.borrow().name;
     *self = &*self / rhs;
-    self.borrow_mut().var_name = name;
+    self.borrow_mut().name = name;
 }
 
-// Sum
+// Iter
 
 impl Sum for Value {
     fn sum<I>(iter: I) -> Value
@@ -82,6 +85,19 @@ impl Sum for Value {
         let mut iter = iter;
         match iter.next() {
             Some(first) => iter.fold(first, |acc, val| acc + val),
+            None => Value::new(0.0),
+        }
+    }
+}
+
+impl Product for Value {
+    fn product<I>(iter: I) -> Value
+    where
+        I: Iterator<Item = Self>,
+    {
+        let mut iter = iter;
+        match iter.next() {
+            Some(first) => iter.fold(first, |acc, val| acc * val),
             None => Value::new(0.0),
         }
     }

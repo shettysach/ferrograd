@@ -50,8 +50,6 @@ fn main() {
     print_grid(&model, 15);
 }
 
-// -- Grid --
-
 fn print_grid(model: &MultiLayerPerceptron, bound: i32) {
     println!("\nASCII contour graph - \n■ > 0.5  \n□ <= 0.5 ");
     for y in -bound..bound {

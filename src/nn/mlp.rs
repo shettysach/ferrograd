@@ -43,9 +43,9 @@ impl MultiLayerPerceptron {
 
 impl fmt::Display for MultiLayerPerceptron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "MLP:").unwrap();
+        writeln!(f, "MLP:")?;
         for (i, layer) in self.layers.iter().enumerate() {
-            writeln!(f, "  layer {}: [ {} ]", i, layer).unwrap();
+            writeln!(f, "layer {} - {}", i, layer)?;
         }
         Ok(())
     }

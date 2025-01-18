@@ -1,4 +1,4 @@
-use std::{cell::RefCell, ops, rc::Rc};
+use std::{cell::RefCell, cmp::Ordering, fmt, hash::Hash, ops::Deref, rc::Rc};
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -11,7 +11,7 @@ pub struct V {
     pub(crate) prev: Prev,
     pub(crate) op: Op,
     pub(crate) uuid: Uuid,
-    pub(crate) var_name: Option<char>,
+    pub(crate) name: Option<char>,
 }
 
 #[derive(Debug)]
@@ -21,13 +21,24 @@ pub enum Prev {
     Binary(Value, Value),
 }
 
-// val.0.borrow() becomes val.borrow()
-impl ops::Deref for Value {
-    type Target = Rc<RefCell<V>>;
+#[derive(Debug)]
+pub enum Op {
+    Add,
+    Mul,
+    Pow,
+    Ln,
+    Exp,
+    ActvFn(ActvFn),
+    Var,
+    Const,
+}
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+#[derive(Debug, Clone, Copy)]
+pub enum ActvFn {
+    ReLU,
+    LeakyReLU,
+    Tanh,
+    Sigmoid,
 }
 
 impl Value {
@@ -45,12 +56,16 @@ impl Value {
             prev,
             op,
             uuid: Uuid::new_v4(),
-            var_name: name,
+            name,
         })))
     }
 
     pub fn new(data: f64) -> Value {
-        Value::init(data, None, Prev::Init, Op::Init, None)
+        Value::init(data, None, Prev::Init, Op::Var, None)
+    }
+
+    pub(crate) fn new_const(data: f64) -> Value {
+        Value::init(data, None, Prev::Init, Op::Const, None)
     }
 
     pub fn new_1d(data: &[f64]) -> Vec<Value> {
@@ -69,13 +84,17 @@ impl Value {
         data.iter().map(|t| Value::from_1d(t)).collect()
     }
 
-    pub fn new_with_name(data: f64, name: char) -> Value {
-        Value::init(data, None, Prev::Init, Op::Init, Some(name))
-    }
-
     pub fn with_name(self, name: char) -> Value {
-        self.borrow_mut().var_name = Some(name);
+        self.borrow_mut().name = Some(name);
         self
+    }
+}
+
+// val.0.borrow() becomes val.borrow()
+impl Deref for Value {
+    type Target = Rc<RefCell<V>>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -85,21 +104,87 @@ impl<T: Into<f64>> From<T> for Value {
     }
 }
 
-#[derive(Debug)]
-pub enum Op {
-    Init,
-    Add,
-    Mul,
-    Pow,
-    Ln,
-    Exp,
-    ActvFn(ActvFn),
+impl Hash for Value {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.borrow().uuid.hash(state);
+    }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum ActvFn {
-    ReLU,
-    LeakyReLU,
-    Tanh,
-    Sigmoid,
+impl Eq for Value {}
+
+impl PartialEq for Value {
+    fn eq(&self, other: &Value) -> bool {
+        self.borrow().uuid == other.borrow().uuid
+    }
+}
+
+impl Ord for Value {
+    fn cmp(&self, other: &Value) -> Ordering {
+        self.borrow()
+            .data
+            .partial_cmp(&other.borrow().data)
+            .expect("Error in comparing f64s")
+    }
+}
+
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Value) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl fmt::Debug for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Value")
+            .field("data", &self.borrow().data)
+            .field("grad", &self.borrow().grad)
+            .field("name", &self.borrow().name)
+            .field("op", &self.borrow().op)
+            .field("prev", &self.borrow().prev)
+            .finish()
+    }
+}
+
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let v = &self.borrow();
+
+        match (v.name, &v.op) {
+            (Some(name), Op::Var) => {
+                write!(f, "data = {:.3}, grad = {:.3} ← {}", v.data, v.grad, name)
+            }
+            (Some(name), op) => {
+                write!(
+                    f,
+                    "{} data = {:.3}, grad = {:.3} ← {}",
+                    op, v.data, v.grad, name
+                )
+            }
+            (None, Op::Const) => {
+                write!(f, "{:.3}", v.data)
+            }
+            (None, op) => {
+                write!(f, "{} data = {:.3}, grad = {:.3}", op, v.data, v.grad,)
+            }
+        }
+    }
+}
+
+impl fmt::Display for Op {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let symbol = match self {
+            Op::Add => "+",
+            Op::Mul => "*",
+            Op::Pow => "^",
+            Op::Ln => "ln",
+            Op::Exp => "exp",
+            Op::ActvFn(ActvFn::ReLU) => "ReLU",
+            Op::ActvFn(ActvFn::LeakyReLU) => "LeakyReLU",
+            Op::ActvFn(ActvFn::Tanh) => "tanh",
+            Op::ActvFn(ActvFn::Sigmoid) => "σ",
+            _ => "",
+        };
+
+        write!(f, "{}", symbol)
+    }
 }

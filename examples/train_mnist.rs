@@ -9,15 +9,12 @@ use ferrograd::{
 };
 
 fn main() {
-    // Loading training data
     let batch_size = 100;
     let mnist = rust_mnist::Mnist::new("data/mnist/");
 
-    // MLP
     let model = MultiLayerPerceptron::new(784, vec![64, 32, 10], ActvFn::LeakyReLU);
     println!("Model: {:#?}\n", model);
 
-    // Optimizer, loss criterion and accuracy metric
     let mut optim = Adam::new(model.parameters(), 0.1, 0.9, 0.999, 1e-8);
     let loss = CrossEntropyLoss::new();
     let accuracy = BinaryAccuracy::new(0.5);
@@ -29,7 +26,6 @@ fn main() {
 
     let model_path = "model/mod_64x32";
 
-    // Training
     for k in 0..200 {
         let b = k % 10;
         let start = b * batch_size;
@@ -62,14 +58,13 @@ fn main() {
         if b == 9 {
             match model.save(model_path) {
                 Ok(_) => {
-                    println!("\n> Model saved successfully at {model_path}\n")
+                    println!("\n> Model saved successfully at {model_path}.\n")
                 }
                 Err(err) => eprintln!("{}", err),
             };
         }
     }
 
-    // Loading training data
     let test_samples = 100;
     let xtest: Vec<Vec<Value>> = mnist.test_data[..test_samples]
         .iter()
@@ -80,7 +75,6 @@ fn main() {
         })
         .collect();
 
-    // Making predictions
     println!("Testing");
     let ypred = softmax(&model.forward(&xtest));
 
@@ -103,8 +97,6 @@ fn main() {
 
     println!("Correct predictions: {}/{}", correct, test_samples);
 }
-
-// --- Data transformation ---
 
 fn images_to_features(imgvec: &[[u8; 784]]) -> Vec<Vec<Value>> {
     imgvec

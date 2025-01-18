@@ -18,7 +18,7 @@ fn add(self: Value, rhs: Value) -> Value {
 fn add(self: Value, rhs: f64) -> Value {
     Value::init(
         self.borrow().data + rhs,
-        Some(add_backward),
+        Some(add_backward_lhs),
         Prev::Binary(self.clone(), Value::new_const(rhs)),
         Op::Add,
         None,
@@ -29,7 +29,7 @@ fn add(self: Value, rhs: f64) -> Value {
 fn add(self: f64, rhs: Value) -> Value {
     Value::init(
         self + rhs.borrow().data,
-        Some(add_backward),
+        Some(add_backward_rhs),
         Prev::Binary(Value::new_const(self), rhs.clone()),
         Op::Add,
         None,
@@ -37,9 +37,21 @@ fn add(self: f64, rhs: Value) -> Value {
 }
 
 fn add_backward(value: &V) {
-    if let Prev::Binary(a, b) = &value.prev {
-        a.borrow_mut().grad += value.grad;
-        b.borrow_mut().grad += value.grad;
+    if let Prev::Binary(l, r) = &value.prev {
+        l.borrow_mut().grad += value.grad;
+        r.borrow_mut().grad += value.grad;
+    }
+}
+
+fn add_backward_lhs(value: &V) {
+    if let Prev::Binary(l, _) = &value.prev {
+        l.borrow_mut().grad += value.grad;
+    }
+}
+
+fn add_backward_rhs(value: &V) {
+    if let Prev::Binary(_, r) = &value.prev {
+        r.borrow_mut().grad += value.grad;
     }
 }
 
@@ -60,7 +72,7 @@ fn mul(self: Value, rhs: Value) -> Value {
 fn mul(self: Value, rhs: f64) -> Value {
     Value::init(
         self.borrow().data * rhs,
-        Some(mul_backward),
+        Some(mul_backward_lhs),
         Prev::Binary(self.clone(), Value::new_const(rhs)),
         Op::Mul,
         None,
@@ -71,7 +83,7 @@ fn mul(self: Value, rhs: f64) -> Value {
 fn mul(self: f64, rhs: Value) -> Value {
     Value::init(
         self * rhs.borrow().data,
-        Some(mul_backward),
+        Some(mul_backward_rhs),
         Prev::Binary(Value::new_const(self), rhs.clone()),
         Op::Mul,
         None,
@@ -79,11 +91,25 @@ fn mul(self: f64, rhs: Value) -> Value {
 }
 
 fn mul_backward(value: &V) {
-    if let Prev::Binary(a, b) = &value.prev {
-        let data_a = a.borrow().data;
-        let data_b = b.borrow().data;
-        a.borrow_mut().grad += data_b * value.grad;
-        b.borrow_mut().grad += data_a * value.grad;
+    if let Prev::Binary(l, r) = &value.prev {
+        let l_data = l.borrow().data;
+        let r_data = r.borrow().data;
+        l.borrow_mut().grad += r_data * value.grad;
+        r.borrow_mut().grad += l_data * value.grad;
+    }
+}
+
+fn mul_backward_lhs(value: &V) {
+    if let Prev::Binary(l, r) = &value.prev {
+        let r_data = r.borrow().data;
+        l.borrow_mut().grad += r_data * value.grad;
+    }
+}
+
+fn mul_backward_rhs(value: &V) {
+    if let Prev::Binary(l, r) = &value.prev {
+        let l_data = l.borrow().data;
+        r.borrow_mut().grad += l_data * value.grad;
     }
 }
 
@@ -133,9 +159,5 @@ impl Value {
             Op::Exp,
             None,
         )
-    }
-
-    fn new_const(data: f64) -> Value {
-        Value::init(data, None, Prev::Init, Op::Init, None)
     }
 }

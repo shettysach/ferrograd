@@ -74,8 +74,6 @@ fn main() {
     }
 }
 
-// --- Dataloader ---
-
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
