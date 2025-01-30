@@ -63,10 +63,10 @@ fn main() {
             .map(|(ind, _)| ind);
 
         let res = match argmax {
-            Some(0) => Ok("Iris-setosa"),
-            Some(1) => Ok("Iris-versicolor"),
-            Some(2) => Ok("Iris-virginica"),
-            _ => Err("Error predicting value"),
+            Some(0) => Some("Iris-setosa"),
+            Some(1) => Some("Iris-versicolor"),
+            Some(2) => Some("Iris-virginica"),
+            _ => None,
         };
 
         print!("X: {:?} => ", sample);

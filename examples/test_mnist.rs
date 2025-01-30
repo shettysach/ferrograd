@@ -11,7 +11,7 @@ fn main() {
     let model_path = "model/mod_64x32";
     match model.load(model_path) {
         Ok(_) => println!("> Model loaded successfully from {model_path}\n"),
-        Err(err) => panic!("{}", err),
+        Err(err) => eprintln!("{err}"),
     };
 
     let test_samples = 100;
@@ -39,11 +39,11 @@ fn main() {
                 .enumerate()
                 .max_by_key(|(_, v)| *v)
                 .map(|(ind, v)| (ind, v.borrow().data))
-                .expect("Error  in prediction");
+                .unwrap();
 
             let img = mnist.test_data[offset + i];
-            let label = mnist.test_labels[offset + i];
-            let pred = label as usize == argmax;
+            let label = mnist.test_labels[offset + i] as usize;
+            let pred = label == argmax;
 
             print_mnist_image(&img);
             println!("ytrue: {}", label);

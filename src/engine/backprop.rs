@@ -38,7 +38,6 @@ impl Value {
         }
     }
 
-    /// Returns tree with final output as root and inputs as leaves.
     pub fn tree(&self) -> Tree<Value> {
         let mut root = Tree::new(self.clone());
         let node = self.borrow();

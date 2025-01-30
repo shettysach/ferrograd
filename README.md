@@ -161,36 +161,39 @@ ReLU data = 0.562, grad = 1.000
 
 ##### MNIST
 
-> **NOTE:** To run the MNIST examples, download the [data](https://yann.lecun.com/exdb/mnist/), gzip extract all 4 files, and move them to the directory `/data/mnist/`.
+> [!NOTE]
+> Using [`rusty_mnist`](https://github.com/busyboredom/rust-mnist) for parsing MNIST files. To run the MNIST examples, read the repo's README. Ensure the required files are in the directory `/data/mnist/`.
 
 ```rust
 use ferrograd::{
-    engine::{Activation, Value},
+    engine::{ActvFn, Value},
     nn::{softmax, MultiLayerPerceptron},
 };
 use rand::Rng;
 
 fn main() {
-    // MLP
-    let model =
-        MultiLayerPerceptron::new(784, vec![64, 32, 10], Activation::LeakyReLU);
+    let model = MultiLayerPerceptron::new(784, vec![64, 32, 10], ActvFn::LeakyReLU);
     println!("{}\n", model);
 
     let model_path = "model/mod_64x32";
     match model.load(model_path) {
         Ok(_) => println!("> Model loaded successfully from {model_path}\n"),
-        Err(err) => panic!("{}", err),
+        Err(err) => panic!("{err}"),
     };
 
-    // Loading test data
     let test_samples = 100;
     let offset = rand::thread_rng().gen_range(0..9_900);
 
     let mnist = rust_mnist::Mnist::new("data/mnist/");
-    let xtest: Vec<Vec<Value>> =
-        images_to_features(&mnist.test_data[offset..offset + test_samples]);
+    let xtest: Vec<Vec<Value>> = mnist.test_data[offset..offset + test_samples]
+        .iter()
+        .map(|img| {
+            img.iter()
+                .map(|pix| Value::new(*pix as f64 / 255.0))
+                .collect()
+        })
+        .collect();
 
-    // Making predictions
     let correct = xtest
         .iter()
         .enumerate()
@@ -203,13 +206,13 @@ fn main() {
                 .enumerate()
                 .max_by_key(|(_, v)| *v)
                 .map(|(ind, v)| (ind, v.borrow().data))
-                .expect("Error  in prediction");
+                .unwrap();
 
-            let img = &mnist.test_data[offset + i];
-            let label = mnist.test_labels[offset + i];
-            let pred = label as usize == argmax;
+            let img = mnist.test_data[offset + i];
+            let label = mnist.test_labels[offset + i] as usize;
+            let pred = label == argmax;
 
-            print_mnist_image(img);
+            print_mnist_image(&img);
             println!("ytrue: {}", label);
             println!("ypred: {argmax}");
             println!("prob: {prob:.3}");
@@ -222,6 +225,7 @@ fn main() {
     println!("Correct predictions: {}/{}", correct, test_samples);
 }
 
+
 // --- Helper functions ---
 ```
 
@@ -229,9 +233,7 @@ fn main() {
 cargo run --example test_mnist
 ```
 
-<div "align: center;">
-    <img src="mnist.gif" width="75%">
-</div>
+<img src="mnist.gif" width="50%">
 
 ---
 
@@ -341,8 +343,7 @@ ASCII contour graph -
 
 ---
 
-> NOTE:
->
+> [!NOTE]
 > - Created for learning and not optimized for performance.
 >   - Uses scalar values (`Value`) and operations. `Vec<Value>` and `Vec<Vec<Value>>` are used in place of 1d and 2d tensors.
 >   - Negation and subtraction involves multiplication with -1 and division involves raising to the power -1, instead of direct implementations, similar to how it is implemented in micrograd.
